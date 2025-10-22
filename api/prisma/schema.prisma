@@ -15,7 +15,7 @@ datasource db {
 }
 
 // Model User untuk Dosen dan Mahasiswa
-model User{
+model User {
   id Int @id @default(autoincrement())  // ID unik buat tiap user
   name String                           //Nama lengkap user
   email String @unique                  // Email user, @unique artinya gak boleh ada yang sama
@@ -26,4 +26,18 @@ model User{
   avatar String?                        // Link ke foto profil, ini juga gk wajib diisi
   createdAt DateTime @default(now())    // Kapan akun ini dibuat
   updateAt DateTime @updatedAt          // Kapan data user terakhir diubah
+}
+
+// Model Task untuk mengatur tugas-tugas kuliah
+model Task {
+  id Int @id @default(autoincrement())
+  title String                            // Untuk judul tugas
+  description String? @db.Text            // Deskripsi tugas
+  course String?                          // Tugas ini buat mata kuliah apa
+  dueDate DateTime                        // Deadline atau tanggal pengumpulan
+  priority String @default("medium")      // Tingkat prioritas (low, medium, high)
+  status String @default("todo")          // Status pengerjaan
+  reminder DateTime?                      // Untuk notif
+  createdAt DateTime @default(now())      // Kapan tugas dibuat
+  updateAt DateTime @updatedAt            // Kapan tugas terakhir diubah
 }
