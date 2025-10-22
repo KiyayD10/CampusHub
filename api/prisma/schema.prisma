@@ -11,4 +11,19 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Model User untuk Dosen dan Mahasiswa
+model User{
+  id Int @id @default(autoincrement())  // ID unik buat tiap user
+  name String                           //Nama lengkap user
+  email String @unique                  // Email user, @unique artinya gak boleh ada yang sama
+  password String                       //Password diHash (diamanin)
+  role String @default("student")       // Peran user, kalau gak diisi otomatis jadi "student
+  npm String?                           // Tanda tanya (?) artinya gak wajib diisi (opsional), buat mahasiswa
+  phone String?                         // Nomor HP, juga gak wajib diisi
+  avatar String?                        // Link ke foto profil, ini juga gk wajib diisi
+  createdAt DateTime @default(now())    // Kapan akun ini dibuat
+  updateAt DateTime @updatedAt          // Kapan data user terakhir diubah
 }
