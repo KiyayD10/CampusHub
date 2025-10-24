@@ -80,3 +80,14 @@ model Product {
   createAt DateTime @default(now())      // Kapan produk di upload
   updateAt DateTime @updatedAt           // Kapan produknya di update
 }
+
+// model Transaction untuk riwayat jual - beli
+model Transaction {
+  id Int @id @default(autoincrement())
+  quantity Int @default(1)              // Banyak barang yang dibeli
+  totalPrice Int                        // Total harga
+  status String @default("pending")     // Status transaksi (pending, sukses, batal)
+  notes String? @db.Text                // Catatan dari sipembeli
+  createdAt DateTime @default(now())    // Kapan transaksi dibuat
+  updateAt DateTime @updatedAt          // Kapan status transaksi di update
+}
