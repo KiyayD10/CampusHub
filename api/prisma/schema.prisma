@@ -91,3 +91,14 @@ model Transaction {
   createdAt DateTime @default(now())    // Kapan transaksi dibuat
   updateAt DateTime @updatedAt          // Kapan status transaksi di update
 }
+
+// model Notification untuk notif di aplikasi
+model Notification {
+  id Int @id @default(autoincrement())
+  title String                          // Judul notif
+  body String @db.Text                  // Isi pesan notif nya
+  type String @default("general")       // Tipe notif 
+  isRead Boolean @default(false)        // Cek udah di baca atau belum
+  data Json?                            // Untuk simpan data tambahan
+  createdAt DateTime @default(now())    // Kapan notif di buat
+}
