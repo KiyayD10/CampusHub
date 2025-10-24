@@ -52,3 +52,16 @@ model Attendance {
   status String @default("present")     // Status absennya apakah(masuk, alpa, telat)
   timesTamp DateTime @default(now())    // Jam berapa dia absen
 }
+
+// Model QRSession yang di buat oleh dosen
+model QRSession {
+  id Int @id @default(autoincrement())
+  courseNama String                       // Sesi QR ini untuk matkul apa
+  qrHash String @unique                   // Kode unik sesi ini nanti ditampilin jadi QR gak boleh ada yang sama
+  expiresAt DateTime                      // Kapan QR ini kadaluarsa / gk bisa di scan lagi
+  latitude Float?                         // Lokasi dosen / kelas pas bikin absen
+  longitude Float?                        // Sama aja
+  radius Int @default(50)                 // Radius toleransi dari lokasi dosen
+  createdBy String                        // Email dosen yang buat QR nya
+  createdAt DateTime @default(now())      // Sesi QR dibuat
+}
