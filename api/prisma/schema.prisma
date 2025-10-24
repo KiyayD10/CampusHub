@@ -65,3 +65,18 @@ model QRSession {
   createdBy String                        // Email dosen yang buat QR nya
   createdAt DateTime @default(now())      // Sesi QR dibuat
 }
+
+// model Product barang yang dijual di marketplace
+model Product {
+  id Int @id @default(autoincrement())
+  name String                            // Nama produk
+  description String? @db.Text           // Deskripsi produk
+  price Int                              // Harga dari produk 
+  stok Int @default(0)                   // Stok yang tersedia  
+  category String @default("others")     // Kategori produk
+  image String[]                         // Array karena untuk menyimpan link dari gambar produk
+  condition String @default("new")       // Kondisi dari barangnya (baru, bagus, dll)
+  status String @default("available")    // Status produknya (tersedia, terjual, dll)
+  createAt DateTime @default(now())      // Kapan produk di upload
+  updateAt DateTime @updatedAt           // Kapan produknya di update
+}
