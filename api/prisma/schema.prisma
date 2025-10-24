@@ -24,7 +24,7 @@ model User {
   npm String?                           // Tanda tanya (?) artinya gak wajib diisi (opsional), buat mahasiswa
   phone String?                         // Nomor HP, juga gak wajib diisi
   avatar String?                        // Link ke foto profil, ini juga gk wajib diisi
-  createdAt DateTime @default(now())    // Kapan akun ini dibuat
+  createdAt DateTime @default(now())    // Kapan akun dibuat
   updateAt DateTime @updatedAt          // Kapan data user terakhir diubah
 }
 
@@ -40,4 +40,15 @@ model Task {
   reminder DateTime?                      // Untuk notif
   createdAt DateTime @default(now())      // Kapan tugas dibuat
   updateAt DateTime @updatedAt            // Kapan tugas terakhir diubah
+}
+
+// Model Attendance untuk simpan absen mahasiswa
+model Attendance {
+  id Int @id @default(autoincrement())
+  courseNama String                     // Absen matakuliah apa
+  qrHash String                         // QR yang di scan mahasiswa
+  latitude Float?                       // Koordinat mahasiswa pas absen 
+  longitud Float?                       // Sama aja
+  status String @default("present")     // Status absennya apakah(masuk, alpa, telat)
+  timesTamp DateTime @default(now())    // Jam berapa dia absen
 }
