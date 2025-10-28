@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
@@ -25,7 +25,7 @@ model User {
   phone String?                         // Nomor HP, juga gak wajib diisi
   avatar String?                        // Link ke foto profil, ini juga gk wajib diisi
   createdAt DateTime @default(now())    // Kapan akun dibuat
-  updateAt DateTime @updatedAt          // Kapan data user terakhir diubah
+  updatedAt DateTime @updatedAt          // Kapan data user terakhir diubah
 
   // Relasi ke tabel lain 
   tasks Task[]                      // Untuk banyak tugas 
@@ -33,6 +33,7 @@ model User {
   products Product[]                // ..... ...... produk
   transactions Transaction[]        // ..... ...... transaksi
   notifications Notification[]      // ..... ...... notifikasi
+  qrSessionsCreated QRSession[]    @relation("LecturerSessions")
 
   // Indeks untuk mempercepat pencarian data di database
   @@index([email])  // Cari user berdasarkan email
@@ -50,7 +51,7 @@ model Task {
   status String @default("todo")          // Status pengerjaan
   reminder DateTime?                      // Untuk notif
   createdAt DateTime @default(now())      // Kapan tugas dibuat
-  updateAt DateTime @updatedAt            // Kapan tugas terakhir diubah
+  updatedAt DateTime @updatedAt            // Kapan tugas terakhir diubah
 
   // Relasi ke tabel user
   user User @relation(fields: [userId], references: [id], onDelete: Cascade) // Tugas ini punya siapa
@@ -65,12 +66,12 @@ model Task {
 // Model Attendance untuk simpan absen mahasiswa
 model Attendance {
   id Int @id @default(autoincrement())
-  courseNama String                     // Absen matakuliah apa
+  courseName String                     // Absen matakuliah apa
   qrHash String                         // QR yang di scan mahasiswa
   latitude Float?                       // Koordinat mahasiswa pas absen 
-  longitud Float?                       // Sama aja
+  longitude Float?                       // Sama aja
   status String @default("present")     // Status absennya apakah(masuk, alpa, telat)
-  timesTamp DateTime @default(now())    // Jam berapa dia absen
+  timestamp DateTime @default(now())    // Jam berapa dia absen
 
   // Relasi ke tabel user
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade) // Siapa yang absen?
@@ -79,13 +80,13 @@ model Attendance {
   // Indexing
   @@index([userId])   // Biar cepet nyari riwayat absen satu mahasiswa
   @@index([qrHash])   // Buat validasi QR
-  @@index([timesTamp])// Biar cepet ngurutin absen berdasarkan waktu
+  @@index([timestamp])// Biar cepet ngurutin absen berdasarkan waktu
 }
 
 // Model QRSession yang di buat oleh dosen
 model QRSession {
   id Int @id @default(autoincrement())
-  courseNama String                       // Sesi QR ini untuk matkul apa
+  courseName String                       // Sesi QR ini untuk matkul apa
   qrHash String @unique                   // Kode unik sesi ini nanti ditampilin jadi QR gak boleh ada yang sama
   expiresAt DateTime                      // Kapan QR ini kadaluarsa / gk bisa di scan lagi
   latitude Float?                         // Lokasi dosen / kelas pas bikin absen
@@ -93,6 +94,10 @@ model QRSession {
   radius Int @default(50)                 // Radius toleransi dari lokasi dosen
   createdBy String                        // Email dosen yang buat QR nya
   createdAt DateTime @default(now())      // Sesi QR dibuat
+
+  // Relasi ke User (Dosen) yang membuat sesi ini
+  lecturer   User @relation("LecturerSessions", fields: [lecturerId], references: [id], onDelete: Cascade)
+  lecturerId Int
 
   // Indexing
   @@index([qrHash])    // Biar pas mahasiswa scan, nyari datanya cepet
@@ -105,17 +110,18 @@ model Product {
   name String                            // Nama produk
   description String? @db.Text           // Deskripsi produk
   price Int                              // Harga dari produk 
-  stok Int @default(0)                   // Stok yang tersedia  
+  stock Int @default(0)                   // Stok yang tersedia  
   category String @default("others")     // Kategori produk
-  image String[]                         // Array karena untuk menyimpan link dari gambar produk
+  images String[]                         // Array karena untuk menyimpan link dari gambar produk
   condition String @default("new")       // Kondisi dari barangnya (baru, bagus, dll)
   status String @default("available")    // Status produknya (tersedia, terjual, dll)
-  createAt DateTime @default(now())      // Kapan produk di upload
-  updateAt DateTime @updatedAt           // Kapan produknya di update
+  createdAt DateTime @default(now())      // Kapan produk di upload
+  updatedAt DateTime @updatedAt           // Kapan produknya di update
 
   // Relasi ke tabel user
   owner   User @relation(fields: [ownerId], references: [id], onDelete: Cascade) // Siapa penjualnya?
   ownerId Int  // Kunci tamu ke tabel User
+
   transactions Transaction[] // Satu produk bisa ada di banyak transaksi
 
   // Indexing
@@ -132,11 +138,12 @@ model Transaction {
   status String @default("pending")     // Status transaksi (pending, sukses, batal)
   notes String? @db.Text                // Catatan dari sipembeli
   createdAt DateTime @default(now())    // Kapan transaksi dibuat
-  updateAt DateTime @updatedAt          // Kapan status transaksi di update
+  updatedAt DateTime @updatedAt          // Kapan status transaksi di update
 
   // Relasi ke tabel user
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade) // Produk apa yang dibeli?
   productId Int     // Kunci tamu ke tabel Product
+
   buyer   User @relation(fields: [buyerId], references: [id], onDelete: Cascade) // Siapa yang beli?
   buyerId Int  // Kunci tamu ke tabel User
 
