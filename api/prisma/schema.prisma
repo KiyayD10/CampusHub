@@ -55,6 +55,11 @@ model Task {
   // Relasi ke tabel user
   user User @relation(fields: [userId], references: [id], onDelete: Cascade) // Tugas ini punya siapa
   userId Int // Kunci buat nyambungin ke ID di tabel user
+
+  // Indexing buat percepat query
+  @@index([userId])  // Biar cepet nyari semua tugas milik satu user
+  @@index([status])  // Biar cepet filter tugas berdasarkan status
+  @@index([dueDate]) // Biar cepet ngurutin tugas berdasarkan deadline
 }
 
 // Model Attendance untuk simpan absen mahasiswa
@@ -70,6 +75,11 @@ model Attendance {
   // Relasi ke tabel user
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade) // Siapa yang absen?
   userId Int  // Kunci tamu ke tabel User
+
+  // Indexing
+  @@index([userId])   // Biar cepet nyari riwayat absen satu mahasiswa
+  @@index([qrHash])   // Buat validasi QR
+  @@index([timesTamp])// Biar cepet ngurutin absen berdasarkan waktu
 }
 
 // Model QRSession yang di buat oleh dosen
@@ -83,6 +93,10 @@ model QRSession {
   radius Int @default(50)                 // Radius toleransi dari lokasi dosen
   createdBy String                        // Email dosen yang buat QR nya
   createdAt DateTime @default(now())      // Sesi QR dibuat
+
+  // Indexing
+  @@index([qrHash])    // Biar pas mahasiswa scan, nyari datanya cepet
+  @@index([expiresAt]) // Biar gampang nyari sesi QR yang udah kadaluarsa
 }
 
 // model Product barang yang dijual di marketplace
@@ -103,6 +117,11 @@ model Product {
   owner   User @relation(fields: [ownerId], references: [id], onDelete: Cascade) // Siapa penjualnya?
   ownerId Int  // Kunci tamu ke tabel User
   transactions Transaction[] // Satu produk bisa ada di banyak transaksi
+
+  // Indexing
+  @@index([ownerId])  // Biar cepet nampilin semua produk dari satu penjual
+  @@index([status])
+  @@index([category])
 }
 
 // model Transaction untuk riwayat jual - beli
@@ -120,6 +139,11 @@ model Transaction {
   productId Int     // Kunci tamu ke tabel Product
   buyer   User @relation(fields: [buyerId], references: [id], onDelete: Cascade) // Siapa yang beli?
   buyerId Int  // Kunci tamu ke tabel User
+
+  // Indexing
+  @@index([buyerId])
+  @@index([productId])
+  @@index([status])
 }
 
 // model Notification untuk notif di aplikasi
@@ -135,4 +159,9 @@ model Notification {
   // Relasi ke tabel user
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade) // Notif ini buat siapa?
   userId Int  // Kunci tamu ke tabel User
+
+  // Indexing
+  @@index([userId])   // Biar cepet nampilin semua notif buat satu user
+  @@index([isRead])   // Biar cepet filter notif yang belum dibaca
+  @@index([createdAt])
 }
