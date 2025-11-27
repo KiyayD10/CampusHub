@@ -131,9 +131,9 @@ export default function HomeScreen() {
           />
           <AnimatedActionCard
             icon="person-outline"
-            label="Profile"
+            label="report"
             color="#6D28D9"
-            href={"/(tabs)/profile" as const}
+            href={"/(tabs)/reports" as const}
             style={{ width: cardWidth, height: cardHeight }}
           />
         </Animated.View>
