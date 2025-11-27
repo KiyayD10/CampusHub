@@ -73,6 +73,7 @@ export default function ProfileScreen() {
                             label="Edit Profile"
                             color="#3B82F6"
                             delay={300}
+                            onPress={() => router.push("/profile/edit")}
                         />
                         <MenuItem
                             icon="notifications-outline"
