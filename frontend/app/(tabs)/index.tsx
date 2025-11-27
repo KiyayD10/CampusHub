@@ -123,24 +123,17 @@ export default function HomeScreen() {
           style={[styles.actionsContainer, { gap: GAP }]}
         >
           <AnimatedActionCard
-            icon="qr-code-outline"
-            label="Scan QR"
-            color="#6D28D9"
-            href={"/(tabs)/attendance" as const}
-            style={{ width: cardWidth, height: cardHeight }}
-          />
-          <AnimatedActionCard
-            icon="clipboard-outline"
-            label="Tasks"
+            icon="search"
+            label="tasks"
             color="#6D28D9"
             href={"/(tabs)/tasks" as const}
             style={{ width: cardWidth, height: cardHeight }}
           />
           <AnimatedActionCard
-            icon="megaphone-outline"
-            label="Report"
+            icon="person-outline"
+            label="Profile"
             color="#6D28D9"
-            href={"/(tabs)/reports" as const}
+            href={"/(tabs)/profile" as const}
             style={{ width: cardWidth, height: cardHeight }}
           />
         </Animated.View>
