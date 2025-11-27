@@ -8,6 +8,7 @@ import { auth, db, storage } from "../../firebaseConfig";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from 'expo-image-picker';
+import { useTheme } from "../../context/ThemeContext";
 
 export default function EditProfileScreen() {
     const user = auth.currentUser;
@@ -18,6 +19,7 @@ export default function EditProfileScreen() {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const router = useRouter();
+    const { theme } = useTheme();
 
     useEffect(() => {
         if (user) {
@@ -98,12 +100,12 @@ export default function EditProfileScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
-            <View style={styles.header}>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
+            <View style={[styles.header, { borderBottomColor: theme.colors.border }]}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color="#1F2937" />
+                    <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Edit Profile</Text>
+                <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Edit Profile</Text>
                 <View style={{ width: 40 }} />
             </View>
 
@@ -119,54 +121,73 @@ export default function EditProfileScreen() {
                                 <ActivityIndicator color="#FFF" />
                             </View>
                         )}
-                        <View style={styles.cameraIcon}>
+                        <View style={[styles.cameraIcon, { borderColor: theme.colors.background }]}>
                             <Ionicons name="camera" size={20} color="#FFF" />
                         </View>
                     </TouchableOpacity>
-                    <Text style={styles.avatarHint}>Tap to change profile picture</Text>
+                    <Text style={[styles.avatarHint, { color: theme.colors.subtext }]}>Tap to change profile picture</Text>
                 </View>
 
                 <View style={styles.form}>
                     <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Email</Text>
+                        <Text style={[styles.label, { color: theme.colors.text }]}>Email</Text>
                         <TextInput
-                            style={[styles.input, styles.disabledInput]}
+                            style={[styles.input, styles.disabledInput, {
+                                borderColor: theme.colors.border,
+                                backgroundColor: theme.colors.border, // Slightly darker for disabled
+                                color: theme.colors.subtext
+                            }]}
                             value={user?.email || ""}
                             editable={false}
                         />
                     </View>
 
                     <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Display Name</Text>
+                        <Text style={[styles.label, { color: theme.colors.text }]}>Display Name</Text>
                         <TextInput
-                            style={styles.input}
+                            style={[styles.input, {
+                                borderColor: theme.colors.border,
+                                backgroundColor: theme.colors.card,
+                                color: theme.colors.text
+                            }]}
                             value={displayName}
                             onChangeText={setDisplayName}
                             placeholder="Enter your name"
+                            placeholderTextColor={theme.colors.subtext}
                         />
                     </View>
 
                     <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Major (Jurusan)</Text>
+                        <Text style={[styles.label, { color: theme.colors.text }]}>Major (Jurusan)</Text>
                         <TextInput
-                            style={styles.input}
+                            style={[styles.input, {
+                                borderColor: theme.colors.border,
+                                backgroundColor: theme.colors.card,
+                                color: theme.colors.text
+                            }]}
                             value={major}
                             onChangeText={setMajor}
                             placeholder="e.g. Computer Science"
+                            placeholderTextColor={theme.colors.subtext}
                         />
                     </View>
 
                     <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Faculty (Fakultas)</Text>
+                        <Text style={[styles.label, { color: theme.colors.text }]}>Faculty (Fakultas)</Text>
                         <TextInput
-                            style={styles.input}
+                            style={[styles.input, {
+                                borderColor: theme.colors.border,
+                                backgroundColor: theme.colors.card,
+                                color: theme.colors.text
+                            }]}
                             value={faculty}
                             onChangeText={setFaculty}
                             placeholder="e.g. Faculty of Engineering"
+                            placeholderTextColor={theme.colors.subtext}
                         />
                     </View>
 
-                    <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={loading || uploading}>
+                    <TouchableOpacity style={[styles.saveButton, { backgroundColor: theme.colors.primary }]} onPress={handleSave} disabled={loading || uploading}>
                         {loading ? (
                             <ActivityIndicator color="#FFF" />
                         ) : (
@@ -180,7 +201,7 @@ export default function EditProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#FFF" },
+    container: { flex: 1 },
     header: {
         flexDirection: "row",
         alignItems: "center",
@@ -188,7 +209,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 12,
         borderBottomWidth: 1,
-        borderBottomColor: "#F3F4F6",
     },
     backButton: {
         padding: 8,
@@ -196,7 +216,6 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 18,
         fontWeight: "600",
-        color: "#111827",
     },
     content: {
         padding: 24,
@@ -229,11 +248,9 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         borderWidth: 2,
-        borderColor: "#FFF",
     },
     avatarHint: {
         fontSize: 14,
-        color: "#6B7280",
         marginTop: 12,
     },
     form: {
@@ -245,23 +262,17 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 14,
         fontWeight: "500",
-        color: "#374151",
     },
     input: {
         borderWidth: 1,
-        borderColor: "#E5E7EB",
         borderRadius: 12,
         padding: 12,
         fontSize: 16,
-        color: "#1F2937",
-        backgroundColor: "#F9FAFB",
     },
     disabledInput: {
-        backgroundColor: "#F3F4F6",
-        color: "#9CA3AF",
+        // Styles overridden inline for dynamic theme
     },
     saveButton: {
-        backgroundColor: "#6D28D9",
         height: 50,
         borderRadius: 12,
         alignItems: "center",
