@@ -9,6 +9,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../firebaseConfig";
+import LogoutModal from "../../components/LogoutModal";
 
 export default function ProfileScreen() {
     const { theme, isDark, toggleTheme } = useTheme();
@@ -38,25 +39,19 @@ export default function ProfileScreen() {
         }, [user])
     );
 
+    const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+
     const handleLogout = () => {
-        Alert.alert(
-            "Log Out",
-            "Are you sure you want to log out?",
-            [
-                { text: "Cancel", style: "cancel" },
-                {
-                    text: "Log Out",
-                    style: "destructive",
-                    onPress: async () => {
-                        try {
-                            await signOut(auth);
-                        } catch (error: any) {
-                            Alert.alert("Error", "Failed to log out: " + error.message);
-                        }
-                    }
-                }
-            ]
-        );
+        setLogoutModalVisible(true);
+    };
+
+    const confirmLogout = async () => {
+        try {
+            await signOut(auth);
+            setLogoutModalVisible(false);
+        } catch (error: any) {
+            Alert.alert("Error", "Failed to log out: " + error.message);
+        }
     };
 
     return (
@@ -177,6 +172,13 @@ export default function ProfileScreen() {
 
                 <View style={{ height: 40 }} />
             </ScrollView>
+
+            <LogoutModal
+                visible={logoutModalVisible}
+                onClose={() => setLogoutModalVisible(false)}
+                onLogout={confirmLogout}
+                theme={theme}
+            />
         </SafeAreaView>
     );
 }
