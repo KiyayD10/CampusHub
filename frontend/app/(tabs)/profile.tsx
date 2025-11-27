@@ -2,16 +2,40 @@ import { View, Text, StyleSheet, Image, Pressable, Switch, ScrollView, Alert } f
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
-import { useState } from "react";
-import { router } from "expo-router";
+import { useState, useEffect, useCallback } from "react";
+import { router, useFocusEffect } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { signOut } from "firebase/auth";
-import { auth } from "../../firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../../firebaseConfig";
 
 export default function ProfileScreen() {
     const [isDark, setIsDark] = useState(false);
     const [notifs, setNotifs] = useState(true);
     const { user } = useAuth();
+    const [major, setMajor] = useState("Computer Science"); // Default fallback
+    const [faculty, setFaculty] = useState("");
+
+    useFocusEffect(
+        useCallback(() => {
+            if (user) {
+                const fetchUserData = async () => {
+                    try {
+                        const docRef = doc(db, "users", user.uid);
+                        const docSnap = await getDoc(docRef);
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
+                            if (data.major) setMajor(data.major);
+                            if (data.faculty) setFaculty(data.faculty);
+                        }
+                    } catch (error) {
+                        console.error("Error fetching user data:", error);
+                    }
+                };
+                fetchUserData();
+            }
+        }, [user])
+    );
 
     const handleLogout = async () => {
         try {
@@ -44,7 +68,7 @@ export default function ProfileScreen() {
                     </View>
                     <Text style={styles.name}>{user?.displayName || user?.email?.split('@')[0] || "User"}</Text>
                     <Text style={styles.studentId}>{user?.email}</Text>
-                    <Text style={styles.major}>Computer Science</Text>
+                    <Text style={styles.major}>{major} {faculty ? `| ${faculty}` : ""}</Text>
 
                     <View style={styles.statsRow}>
                         <View style={styles.statItem}>
