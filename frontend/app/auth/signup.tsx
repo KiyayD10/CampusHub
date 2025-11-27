@@ -19,7 +19,10 @@ export default function SignUpScreen() {
         setLoading(true);
         try {
             await createUserWithEmailAndPassword(auth, email, password);
-            if (router) router.replace("/(tabs)");
+            await auth.signOut();
+            Alert.alert("Success", "Account created successfully. Please sign in.", [
+                { text: "OK", onPress: () => router.replace("/auth/signin") }
+            ]);
         } catch (error: any) {
             Alert.alert("Sign Up Failed", error.message);
         } finally {
