@@ -1,13 +1,12 @@
-// app/(tabs)/attendance.tsx
 import { useCallback, useEffect, useState } from "react";
 import { View, Text, StyleSheet, Pressable, Alert, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Location from "expo-location";
-import { BarCodeScanner, type BarCodeScannerResult } from "expo-barcode-scanner";
+import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import { api } from "@/hooks/useAPI";
 
 export default function AttendanceScreen() {
-  const [hasCamPerm, setHasCamPerm] = useState<boolean | null>(null);
+  const [permission, requestPermission] = useCameraPermissions();
   const [hasLocPerm, setHasLocPerm] = useState<boolean | null>(null);
   const [loc, setLoc] = useState<Location.LocationObject | null>(null);
   const [scanned, setScanned] = useState(false);
@@ -15,15 +14,13 @@ export default function AttendanceScreen() {
   useEffect(() => {
     let mounted = true;
     (async () => {
-      // minta izin kamera & lokasi
-      const cam = await BarCodeScanner.requestPermissionsAsync();
+      // Request location permission
       const locPerm = await Location.requestForegroundPermissionsAsync();
 
       if (!mounted) return;
-      setHasCamPerm(cam.status === "granted");
       setHasLocPerm(locPerm.status === "granted");
 
-      // ambil posisi sekali untuk ditampilkan & dikirim
+      // Get position once
       if (locPerm.status === "granted") {
         const current = await Location.getCurrentPositionAsync({
           accuracy:
@@ -39,7 +36,7 @@ export default function AttendanceScreen() {
   }, []);
 
   const onScan = useCallback(
-    async ({ data }: BarCodeScannerResult) => {
+    async ({ data }: { data: string }) => {
       if (scanned) return;
       setScanned(true);
       try {
@@ -63,20 +60,18 @@ export default function AttendanceScreen() {
     [scanned, loc]
   );
 
-
-  if (hasCamPerm === null) {
-    return (
-      <View style={styles.center}>
-        <Text>Requesting camera permission…</Text>
-      </View>
-    );
+  if (!permission) {
+    // Camera permissions are still loading.
+    return <View />;
   }
 
-  if (hasCamPerm === false) {
+  if (!permission.granted) {
     return (
       <View style={styles.center}>
-        <Text>No access to camera.</Text>
-        <Text style={styles.muted}>Enable camera permission in Settings.</Text>
+        <Text style={styles.message}>We need your permission to show the camera</Text>
+        <Pressable onPress={requestPermission} style={styles.btn}>
+          <Text style={styles.btnText}>Grant Permission</Text>
+        </Pressable>
       </View>
     );
   }
@@ -84,7 +79,14 @@ export default function AttendanceScreen() {
   return (
     <SafeAreaView style={styles.page} edges={['top']}>
       <View style={styles.scannerWrap}>
-        <BarCodeScanner onBarCodeScanned={onScan} style={StyleSheet.absoluteFillObject} />
+        <CameraView
+          style={StyleSheet.absoluteFillObject}
+          facing="back"
+          onBarcodeScanned={scanned ? undefined : onScan}
+          barcodeScannerSettings={{
+            barcodeTypes: ["qr"],
+          }}
+        />
 
         {/* Mask gelap */}
         <View pointerEvents="none" style={styles.mask} />
@@ -118,6 +120,7 @@ const FRAME_SIZE = 260;
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: "#000" },
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 16 },
+  message: { textAlign: 'center', paddingBottom: 10, color: 'white' },
   scannerWrap: { flex: 1 },
   // Mask semi-transparan
   mask: {
