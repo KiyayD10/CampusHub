@@ -1,7 +1,7 @@
 // app/(tabs)/attendance.tsx
 import { useCallback, useEffect, useState } from "react";
 import { View, Text, StyleSheet, Pressable, Alert, Platform } from "react-native";
-import Header from "@/components/Header";
+import { SafeAreaView } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import { BarCodeScanner, type BarCodeScannerResult } from "expo-barcode-scanner";
 import { api } from "@/hooks/useAPI";
@@ -62,7 +62,7 @@ export default function AttendanceScreen() {
     },
     [scanned, loc]
   );
-  
+
 
   if (hasCamPerm === null) {
     return (
@@ -82,8 +82,7 @@ export default function AttendanceScreen() {
   }
 
   return (
-    <View style={styles.page}>
-      <Header title="Scan Attendance" />
+    <SafeAreaView style={styles.page} edges={['top']}>
       <View style={styles.scannerWrap}>
         <BarCodeScanner onBarCodeScanned={onScan} style={StyleSheet.absoluteFillObject} />
 
@@ -110,7 +109,7 @@ export default function AttendanceScreen() {
           </Pressable>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
