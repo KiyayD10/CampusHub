@@ -68,8 +68,10 @@ export default function PersonalInfoScreen() {
                     />
                 </View>
 
-                <InfoItem label="Display Name" value={user?.displayName || userData?.displayName || "Not set"} theme={theme} />
+                <InfoItem label="Full Name" value={userData?.fullName || user?.displayName || "Not set"} theme={theme} />
+                <InfoItem label="Short Name" value={userData?.shortName || "Not set"} theme={theme} />
                 <InfoItem label="Email" value={user?.email || "Not set"} theme={theme} />
+                <InfoItem label="Phone Number" value={userData?.phoneNumber || "Not set"} theme={theme} />
                 <InfoItem label="Major" value={userData?.major || "Not set"} theme={theme} />
                 <InfoItem label="Faculty" value={userData?.faculty || "Not set"} theme={theme} />
 
