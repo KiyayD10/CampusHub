@@ -12,7 +12,9 @@ import { useTheme } from "../../context/ThemeContext";
 
 export default function EditProfileScreen() {
     const user = auth.currentUser;
-    const [displayName, setDisplayName] = useState(user?.displayName || "");
+    const [fullName, setFullName] = useState(user?.displayName || "");
+    const [shortName, setShortName] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
     const [photoURL, setPhotoURL] = useState(user?.photoURL || "");
     const [major, setMajor] = useState("");
     const [faculty, setFaculty] = useState("");
@@ -31,6 +33,9 @@ export default function EditProfileScreen() {
                         const data = docSnap.data();
                         setMajor(data.major || "");
                         setFaculty(data.faculty || "");
+                        if (data.fullName) setFullName(data.fullName);
+                        if (data.shortName) setShortName(data.shortName);
+                        if (data.phoneNumber) setPhoneNumber(data.phoneNumber);
                     }
                 } catch (error) {
                     console.error("Error fetching user data:", error);
@@ -76,7 +81,7 @@ export default function EditProfileScreen() {
         try {
             // Update Auth Profile
             await updateProfile(user, {
-                displayName: displayName,
+                displayName: fullName,
                 photoURL: photoURL,
             });
 
@@ -85,7 +90,9 @@ export default function EditProfileScreen() {
                 major: major,
                 faculty: faculty,
                 email: user.email, // Keep email in sync
-                displayName: displayName,
+                fullName: fullName,
+                shortName: shortName,
+                phoneNumber: phoneNumber,
                 photoURL: photoURL,
                 updatedAt: new Date().toISOString()
             }, { merge: true });
@@ -143,17 +150,48 @@ export default function EditProfileScreen() {
                     </View>
 
                     <View style={styles.inputContainer}>
-                        <Text style={[styles.label, { color: theme.colors.text }]}>Display Name</Text>
+                        <Text style={[styles.label, { color: theme.colors.text }]}>Full Name</Text>
                         <TextInput
                             style={[styles.input, {
                                 borderColor: theme.colors.border,
                                 backgroundColor: theme.colors.card,
                                 color: theme.colors.text
                             }]}
-                            value={displayName}
-                            onChangeText={setDisplayName}
-                            placeholder="Enter your name"
+                            value={fullName}
+                            onChangeText={setFullName}
+                            placeholder="Enter your full name"
                             placeholderTextColor={theme.colors.subtext}
+                        />
+                    </View>
+
+                    <View style={styles.inputContainer}>
+                        <Text style={[styles.label, { color: theme.colors.text }]}>Short Name (Nickname)</Text>
+                        <TextInput
+                            style={[styles.input, {
+                                borderColor: theme.colors.border,
+                                backgroundColor: theme.colors.card,
+                                color: theme.colors.text
+                            }]}
+                            value={shortName}
+                            onChangeText={setShortName}
+                            placeholder="Enter your nickname"
+                            placeholderTextColor={theme.colors.subtext}
+                        />
+                    </View>
+
+                    <View style={styles.inputContainer}>
+                        <Text style={[styles.label, { color: theme.colors.text }]}>Phone Number</Text>
+                        <TextInput
+                            style={[styles.input, {
+                                borderColor: theme.colors.border,
+                                backgroundColor: theme.colors.card,
+                                color: theme.colors.text
+                            }]}
+                            value={phoneNumber}
+                            onChangeText={setPhoneNumber}
+                            placeholder="Enter your phone number"
+                            placeholderTextColor={theme.colors.subtext}
+                            keyboardType="phone-pad"
                         />
                     </View>
 
