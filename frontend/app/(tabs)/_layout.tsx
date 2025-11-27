@@ -18,24 +18,10 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="tasks"
-        options={{
-          title: "Tasks",
-          tabBarIcon: ({ color, size }) => <Ionicons name="checkbox" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="attendance"
         options={{
           title: "Attendance",
           tabBarIcon: ({ color, size }) => <Ionicons name="qr-code" size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="notifications"
-        options={{
-          title: "Notifs",
-          tabBarIcon: ({ color, size }) => <Ionicons name="notifications" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
