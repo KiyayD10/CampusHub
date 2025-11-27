@@ -60,7 +60,10 @@ export default function ProfileScreen() {
                 {/* Header Title */}
                 <Animated.View entering={FadeInDown.delay(100)} style={styles.header}>
                     <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Profile</Text>
-                    <Pressable style={[styles.iconBtn, { backgroundColor: theme.colors.card }]}>
+                    <Pressable
+                        style={[styles.iconBtn, { backgroundColor: theme.colors.card }]}
+                        onPress={() => router.push("/profile/settings")}
+                    >
                         <Ionicons name="settings-outline" size={24} color={theme.colors.icon} />
                     </Pressable>
                 </Animated.View>
