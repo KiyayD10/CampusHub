@@ -1,24 +1,44 @@
 import { useState } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
 import { Link, useRouter } from "expo-router";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebaseConfig";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth, db } from "../../firebaseConfig";
+import { doc, setDoc } from "firebase/firestore";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function SignUpScreen() {
+    const [fullName, setFullName] = useState("");
+    const [shortName, setShortName] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
     const handleSignUp = async () => {
-        if (!email || !password) {
+        if (!fullName || !shortName || !phoneNumber || !email || !password) {
             Alert.alert("Error", "Please fill in all fields");
             return;
         }
         setLoading(true);
         try {
-            await createUserWithEmailAndPassword(auth, email, password);
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // Update Auth Profile
+            await updateProfile(user, {
+                displayName: fullName
+            });
+
+            // Save to Firestore
+            await setDoc(doc(db, "users", user.uid), {
+                fullName,
+                shortName,
+                phoneNumber,
+                email,
+                createdAt: new Date().toISOString()
+            });
+
             await auth.signOut();
             Alert.alert("Success", "Account created successfully. Please sign in.", [
                 { text: "OK", onPress: () => router.replace("/auth/signin") }
@@ -38,6 +58,37 @@ export default function SignUpScreen() {
             </View>
 
             <View style={styles.form}>
+                <View style={styles.inputContainer}>
+                    <Ionicons name="person-outline" size={20} color="#6B7280" style={styles.inputIcon} />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Full Name"
+                        value={fullName}
+                        onChangeText={setFullName}
+                    />
+                </View>
+
+                <View style={styles.inputContainer}>
+                    <Ionicons name="happy-outline" size={20} color="#6B7280" style={styles.inputIcon} />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Short Name (Nickname)"
+                        value={shortName}
+                        onChangeText={setShortName}
+                    />
+                </View>
+
+                <View style={styles.inputContainer}>
+                    <Ionicons name="call-outline" size={20} color="#6B7280" style={styles.inputIcon} />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Phone Number"
+                        value={phoneNumber}
+                        onChangeText={setPhoneNumber}
+                        keyboardType="phone-pad"
+                    />
+                </View>
+
                 <View style={styles.inputContainer}>
                     <Ionicons name="mail-outline" size={20} color="#6B7280" style={styles.inputIcon} />
                     <TextInput
