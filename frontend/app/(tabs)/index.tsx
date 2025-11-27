@@ -3,8 +3,10 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  Dimensions,
   Pressable,
+  useWindowDimensions,
+  StyleProp,
+  ViewStyle,
 } from "react-native";
 import { useEffect, useState } from "react";
 import Animated, {
@@ -22,8 +24,6 @@ import Header from "@/components/Header";
 import TaskCard from "@/components/TaskCard";
 import { api } from "@/hooks/useAPI";
 
-const { width } = Dimensions.get("window");
-
 type Task = {
   id: string;
   title: string;
@@ -40,11 +40,13 @@ function AnimatedActionCard({
   label,
   color,
   href,
+  style,
 }: {
   icon: string;
   label: string;
   color: string;
   href: Href;
+  style?: StyleProp<ViewStyle>;
 }) {
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
@@ -57,7 +59,7 @@ function AnimatedActionCard({
         onPressIn={() => (scale.value = withSpring(0.94))}
         onPressOut={() => (scale.value = withSpring(1))}
       >
-        <Animated.View style={[styles.actionCard, animatedStyle]}>
+        <Animated.View style={[styles.actionCard, style, animatedStyle]}>
           <Ionicons name={icon as any} size={28} color={color} />
           <Text style={styles.cardLabel}>{label}</Text>
         </Animated.View>
@@ -70,8 +72,19 @@ function AnimatedActionCard({
 /*                               HomeScreen                                  */
 /* -------------------------------------------------------------------------- */
 export default function HomeScreen() {
+  const { width } = useWindowDimensions();
   const [todayTasks, setTodayTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Calculate card width dynamically
+  // Padding: 16 * 2 = 32
+  // Gap between cards: 12 * 2 = 24
+  // Total occupied width excluding cards = 56
+  const GAP = 12;
+  const PADDING = 16;
+  const availableWidth = width - (PADDING * 2) - (GAP * 2);
+  const cardWidth = availableWidth / 3;
+  const cardHeight = cardWidth * 1.1;
 
   useEffect(() => {
     (async () => {
@@ -91,7 +104,7 @@ export default function HomeScreen() {
       <Header title="CampusHub" />
 
       <ScrollView
-        contentContainerStyle={styles.body}
+        contentContainerStyle={[styles.body, { paddingBottom: 100 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Header Greeting with Icon & Animation */}
@@ -109,25 +122,28 @@ export default function HomeScreen() {
         {/* Quick Actions */}
         <Animated.View
           entering={FadeInUp.delay(200)}
-          style={styles.actionsContainer}
+          style={[styles.actionsContainer, { gap: GAP }]}
         >
           <AnimatedActionCard
             icon="qr-code-outline"
             label="Scan QR"
             color="#6D28D9"
             href={"/(tabs)/attendance" as const}
+            style={{ width: cardWidth, height: cardHeight }}
           />
           <AnimatedActionCard
             icon="clipboard-outline"
             label="Tasks"
             color="#6D28D9"
             href={"/(tabs)/tasks" as const}
+            style={{ width: cardWidth, height: cardHeight }}
           />
           <AnimatedActionCard
             icon="megaphone-outline"
             label="Report"
             color="#6D28D9"
             href={"/(tabs)/reports" as const}
+            style={{ width: cardWidth, height: cardHeight }}
           />
         </Animated.View>
 
@@ -165,8 +181,6 @@ export default function HomeScreen() {
             </Animated.View>
           ))
         )}
-
-        <View style={{ height: 80 }} />
       </ScrollView>
     </View>
   );
@@ -175,7 +189,6 @@ export default function HomeScreen() {
 /* -------------------------------------------------------------------------- */
 /*                                   Styles                                   */
 /* -------------------------------------------------------------------------- */
-const CARD_WIDTH = (width - 64) / 3;
 
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: "#F3F4F6" },
@@ -203,12 +216,11 @@ const styles = StyleSheet.create({
   // Actions
   actionsContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    // justifyContent: "space-between", // Removed in favor of gap
     marginBottom: 30,
   },
   actionCard: {
-    width: CARD_WIDTH,
-    height: CARD_WIDTH * 1.1,
+    // Width and Height are now dynamic
     backgroundColor: "rgba(255,255,255,0.85)",
     borderRadius: 20,
     alignItems: "center",
@@ -219,7 +231,7 @@ const styles = StyleSheet.create({
     elevation: 6,
     borderWidth: 1,
     borderColor: "rgba(109,40,217,0.1)",
-    backdropFilter: "blur(10px)", // efek glass
+    // backdropFilter: "blur(10px)", // Removed as it's not standard RN
   },
   cardLabel: {
     marginTop: 6,
