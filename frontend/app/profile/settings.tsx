@@ -3,12 +3,46 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useTheme } from "../../context/ThemeContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { auth, db } from "../../firebaseConfig";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 export default function SettingsScreen() {
     const { theme } = useTheme();
     const [biometricEnabled, setBiometricEnabled] = useState(false);
     const [emailNotifs, setEmailNotifs] = useState(true);
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            const user = auth.currentUser;
+            if (user) {
+                const docRef = doc(db, "users", user.uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.emailNotifications !== undefined) {
+                        setEmailNotifs(data.emailNotifications);
+                    }
+                }
+            }
+        };
+        fetchSettings();
+    }, []);
+
+    const toggleEmailNotifs = async (value: boolean) => {
+        setEmailNotifs(value);
+        const user = auth.currentUser;
+        if (user) {
+            const docRef = doc(db, "users", user.uid);
+            try {
+                await updateDoc(docRef, {
+                    emailNotifications: value
+                });
+            } catch (error) {
+                console.error("Error updating email notifications:", error);
+            }
+        }
+    };
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top']}>
@@ -45,7 +79,7 @@ export default function SettingsScreen() {
                         rightElement={
                             <Switch
                                 value={emailNotifs}
-                                onValueChange={setEmailNotifs}
+                                onValueChange={toggleEmailNotifs}
                                 trackColor={{ false: "#D1D5DB", true: "#8B5CF6" }}
                                 thumbColor={"#FFF"}
                             />
