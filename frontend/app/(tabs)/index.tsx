@@ -24,6 +24,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import TaskCard from "@/components/TaskCard";
 import { api } from "@/hooks/useAPI";
+import { useTheme } from "../../context/ThemeContext";
 
 type Task = {
   id: string;
@@ -42,12 +43,14 @@ function AnimatedActionCard({
   color,
   href,
   style,
+  theme,
 }: {
   icon: string;
   label: string;
   color: string;
   href: Href;
   style?: StyleProp<ViewStyle>;
+  theme: any;
 }) {
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
@@ -60,9 +63,9 @@ function AnimatedActionCard({
         onPressIn={() => (scale.value = withSpring(0.94))}
         onPressOut={() => (scale.value = withSpring(1))}
       >
-        <Animated.View style={[styles.actionCard, style, animatedStyle]}>
+        <Animated.View style={[styles.actionCard, style, animatedStyle, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
           <Ionicons name={icon as any} size={28} color={color} />
-          <Text style={styles.cardLabel}>{label}</Text>
+          <Text style={[styles.cardLabel, { color: theme.colors.text }]}>{label}</Text>
         </Animated.View>
       </Pressable>
     </Link>
@@ -77,6 +80,7 @@ export default function HomeScreen() {
   const [todayTasks, setTodayTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const { theme } = useTheme();
 
   // Calculate card width dynamically
   // Padding: 16 * 2 = 32
@@ -102,7 +106,7 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <SafeAreaView style={styles.page} edges={['top']}>
+    <SafeAreaView style={[styles.page, { backgroundColor: theme.colors.background }]} edges={['top']}>
       <ScrollView
         contentContainerStyle={[styles.body, { paddingBottom: 100 }]}
         showsVerticalScrollIndicator={false}
@@ -113,11 +117,11 @@ export default function HomeScreen() {
           style={styles.greetRow}
         >
           <Ionicons name="school-outline" size={28} color="#6D28D9" />
-          <Text style={styles.greet}>
+          <Text style={[styles.greet, { color: theme.colors.text }]}>
             Welcome back, {user?.displayName?.split(' ')[0] || user?.email?.split('@')[0] || "Student"}
           </Text>
         </Animated.View>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.subtitle, { color: theme.colors.subtext }]}>
           Stay productive and manage your campus life easily.
         </Text>
 
@@ -132,6 +136,7 @@ export default function HomeScreen() {
             color="#6D28D9"
             href={"/tasks" as const}
             style={{ width: cardWidth, height: cardHeight }}
+            theme={theme}
           />
           <AnimatedActionCard
             icon="stats-chart-outline"
@@ -139,6 +144,7 @@ export default function HomeScreen() {
             color="#6D28D9"
             href={"/reports" as const}
             style={{ width: cardWidth, height: cardHeight }}
+            theme={theme}
           />
           <AnimatedActionCard
             icon="notifications-outline"
@@ -146,24 +152,25 @@ export default function HomeScreen() {
             color="#6D28D9"
             href={"/notifications" as const}
             style={{ width: cardWidth, height: cardHeight }}
+            theme={theme}
           />
         </Animated.View>
 
         {/* Task Section */}
-        <Text style={styles.section}>Today’s Tasks</Text>
+        <Text style={[styles.section, { color: theme.colors.text }]}>Today’s Tasks</Text>
 
         {loading ? (
           <View style={styles.loadingWrap}>
             <ActivityIndicator animating color="#6D28D9" size="large" />
-            <Text style={styles.loadingText}>Loading your tasks...</Text>
+            <Text style={[styles.loadingText, { color: theme.colors.subtext }]}>Loading your tasks...</Text>
           </View>
         ) : todayTasks.length === 0 ? (
-          <View style={styles.emptyContainer}>
+          <View style={[styles.emptyContainer, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
             <View style={styles.emptyIconCircle}>
               <Ionicons name="calendar-outline" size={40} color="#6D28D9" />
             </View>
-            <Text style={styles.emptyText}>No tasks for today</Text>
-            <Text style={styles.emptySub}>
+            <Text style={[styles.emptyText, { color: theme.colors.text }]}>No tasks for today</Text>
+            <Text style={[styles.emptySub, { color: theme.colors.subtext }]}>
               You’re all caught up! Check back later or add a new task.
             </Text>
           </View>
@@ -193,7 +200,7 @@ export default function HomeScreen() {
 /* -------------------------------------------------------------------------- */
 
 const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: "#F3F4F6" },
+  page: { flex: 1 },
   body: { padding: 16 },
 
   // Greeting
@@ -206,11 +213,9 @@ const styles = StyleSheet.create({
   greet: {
     fontSize: 26,
     fontWeight: "900",
-    color: "#111827",
     letterSpacing: -0.3,
   },
   subtitle: {
-    color: "#6B7280",
     fontSize: 14,
     marginBottom: 24,
   },
@@ -223,7 +228,6 @@ const styles = StyleSheet.create({
   },
   actionCard: {
     // Width and Height are now dynamic
-    backgroundColor: "rgba(255,255,255,0.85)",
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
@@ -232,13 +236,11 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
     borderWidth: 1,
-    borderColor: "rgba(109,40,217,0.1)",
     // backdropFilter: "blur(10px)", // Removed as it's not standard RN
   },
   cardLabel: {
     marginTop: 6,
     fontWeight: "700",
-    color: "#111827",
     fontSize: 13,
   },
 
@@ -246,7 +248,6 @@ const styles = StyleSheet.create({
   section: {
     fontSize: 18,
     fontWeight: "800",
-    color: "#111827",
     marginBottom: 12,
   },
 
@@ -256,21 +257,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 24,
   },
-  loadingText: { color: "#6B7280", marginTop: 8 },
+  loadingText: { marginTop: 8 },
 
   // Empty state modern
   emptyContainer: {
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 40,
-    backgroundColor: "#FFF",
     borderRadius: 20,
     shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 4,
     borderWidth: 1,
-    borderColor: "rgba(109,40,217,0.08)",
   },
   emptyIconCircle: {
     backgroundColor: "rgba(109,40,217,0.1)",
@@ -281,11 +280,9 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 17,
     fontWeight: "700",
-    color: "#1F2937",
   },
   emptySub: {
     fontSize: 13,
-    color: "#6B7280",
     textAlign: "center",
     marginTop: 4,
     maxWidth: 260,
