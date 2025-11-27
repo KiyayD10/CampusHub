@@ -20,7 +20,7 @@ import Animated, {
 import { Link, type Href } from "expo-router";
 import { ActivityIndicator } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
-import Header from "@/components/Header";
+import { SafeAreaView } from "react-native-safe-area-context";
 import TaskCard from "@/components/TaskCard";
 import { api } from "@/hooks/useAPI";
 
@@ -100,9 +100,7 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <View style={styles.page}>
-      <Header title="CampusHub" />
-
+    <SafeAreaView style={styles.page} edges={['top']}>
       <ScrollView
         contentContainerStyle={[styles.body, { paddingBottom: 100 }]}
         showsVerticalScrollIndicator={false}
@@ -182,7 +180,7 @@ export default function HomeScreen() {
           ))
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
