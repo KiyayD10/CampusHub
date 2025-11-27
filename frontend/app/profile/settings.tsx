@@ -9,7 +9,6 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 export default function SettingsScreen() {
     const { theme } = useTheme();
-    const [biometricEnabled, setBiometricEnabled] = useState(false);
     const [emailNotifs, setEmailNotifs] = useState(true);
 
     useEffect(() => {
@@ -90,19 +89,6 @@ export default function SettingsScreen() {
                 {/* Privacy & Security */}
                 <Text style={[styles.sectionTitle, { color: theme.colors.subtext, marginTop: 24 }]}>Privacy & Security</Text>
                 <View style={[styles.sectionContainer, { backgroundColor: theme.colors.card }]}>
-                    <SettingItem
-                        icon="finger-print-outline"
-                        label="Biometric Login"
-                        theme={theme}
-                        rightElement={
-                            <Switch
-                                value={biometricEnabled}
-                                onValueChange={setBiometricEnabled}
-                                trackColor={{ false: "#D1D5DB", true: "#8B5CF6" }}
-                                thumbColor={"#FFF"}
-                            />
-                        }
-                    />
                     <SettingItem
                         icon="shield-checkmark-outline"
                         label="Data Usage"
