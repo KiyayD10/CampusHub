@@ -30,13 +30,13 @@ export default function SettingsScreen() {
                         icon="person-outline"
                         label="Personal Information"
                         theme={theme}
-                        onPress={() => { }}
+                        onPress={() => router.push("/profile/personal-info")}
                     />
                     <SettingItem
                         icon="lock-closed-outline"
                         label="Change Password"
                         theme={theme}
-                        onPress={() => { }}
+                        onPress={() => router.push("/profile/change-password")}
                     />
                     <SettingItem
                         icon="mail-outline"
@@ -90,13 +90,13 @@ export default function SettingsScreen() {
                         icon="document-text-outline"
                         label="Terms of Service"
                         theme={theme}
-                        onPress={() => { }}
+                        onPress={() => router.push("/profile/terms")}
                     />
                     <SettingItem
                         icon="lock-open-outline"
                         label="Privacy Policy"
                         theme={theme}
-                        onPress={() => { }}
+                        onPress={() => router.push("/profile/privacy")}
                     />
                 </View>
 
