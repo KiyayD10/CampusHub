@@ -8,6 +8,7 @@ import {
   StyleProp,
   ViewStyle,
 } from "react-native";
+import { useAuth } from "../../context/AuthContext";
 import { useEffect, useState } from "react";
 import Animated, {
   useSharedValue,
@@ -75,6 +76,7 @@ export default function HomeScreen() {
   const { width } = useWindowDimensions();
   const [todayTasks, setTodayTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   // Calculate card width dynamically
   // Padding: 16 * 2 = 32
@@ -111,7 +113,9 @@ export default function HomeScreen() {
           style={styles.greetRow}
         >
           <Ionicons name="school-outline" size={28} color="#6D28D9" />
-          <Text style={styles.greet}>Welcome back</Text>
+          <Text style={styles.greet}>
+            Welcome back, {user?.displayName?.split(' ')[0] || user?.email?.split('@')[0] || "Student"}
+          </Text>
         </Animated.View>
         <Text style={styles.subtitle}>
           Stay productive and manage your campus life easily.
