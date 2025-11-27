@@ -16,7 +16,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
-import Header from "@/components/Header";
+import { SafeAreaView } from "react-native-safe-area-context";
 import TaskCard from "@/components/TaskCard";
 import { api } from "@/hooks/useAPI";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -68,9 +68,7 @@ export default function TasksScreen() {
   };
 
   return (
-    <View style={styles.page}>
-      <Header title="Tasks" />
-
+    <SafeAreaView style={styles.page} edges={['top']}>
       <Animated.View entering={FadeInRight.delay(100)} style={styles.body}>
         {/* 🔍 Search Bar */}
         <View style={styles.searchRow}>
@@ -139,7 +137,7 @@ export default function TasksScreen() {
           />
         )}
       </Animated.View>
-    </View>
+    </SafeAreaView>
   );
 }
 
