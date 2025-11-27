@@ -17,6 +17,7 @@ export default function ProfileScreen() {
     const { user } = useAuth();
     const [major, setMajor] = useState("Computer Science"); // Default fallback
     const [faculty, setFaculty] = useState("");
+    const [displayName, setDisplayName] = useState("");
 
     useFocusEffect(
         useCallback(() => {
@@ -29,6 +30,10 @@ export default function ProfileScreen() {
                             const data = docSnap.data();
                             if (data.major) setMajor(data.major);
                             if (data.faculty) setFaculty(data.faculty);
+                            // Prefer shortName, then fullName, then auth displayName
+                            if (data.shortName) setDisplayName(data.shortName);
+                            else if (data.fullName) setDisplayName(data.fullName);
+                            else setDisplayName(user.displayName || "");
                         }
                     } catch (error) {
                         console.error("Error fetching user data:", error);
@@ -77,7 +82,7 @@ export default function ProfileScreen() {
                         />
                         <View style={[styles.onlineBadge, { borderColor: theme.colors.card }]} />
                     </View>
-                    <Text style={[styles.name, { color: theme.colors.text }]}>{user?.displayName || user?.email?.split('@')[0] || "User"}</Text>
+                    <Text style={[styles.name, { color: theme.colors.text }]}>{displayName || user?.displayName || user?.email?.split('@')[0] || "User"}</Text>
                     <Text style={[styles.studentId, { color: theme.colors.subtext }]}>{user?.email}</Text>
                     <Text style={[styles.major, { color: theme.colors.primary }]}>{major} {faculty ? `| ${faculty}` : ""}</Text>
 
