@@ -4,12 +4,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import { api } from "@/hooks/useAPI";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function AttendanceScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [hasLocPerm, setHasLocPerm] = useState<boolean | null>(null);
   const [loc, setLoc] = useState<Location.LocationObject | null>(null);
   const [scanned, setScanned] = useState(false);
+  const { theme } = useTheme();
 
   useEffect(() => {
     let mounted = true;
@@ -62,14 +64,14 @@ export default function AttendanceScreen() {
 
   if (!permission) {
     // Camera permissions are still loading.
-    return <View />;
+    return <View style={[styles.page, { backgroundColor: theme.colors.background }]} />;
   }
 
   if (!permission.granted) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.message}>We need your permission to show the camera</Text>
-        <Pressable onPress={requestPermission} style={styles.btn}>
+      <View style={[styles.center, { backgroundColor: theme.colors.background }]}>
+        <Text style={[styles.message, { color: theme.colors.text }]}>We need your permission to show the camera</Text>
+        <Pressable onPress={requestPermission} style={[styles.btn, { backgroundColor: theme.colors.primary }]}>
           <Text style={styles.btnText}>Grant Permission</Text>
         </Pressable>
       </View>
@@ -77,7 +79,7 @@ export default function AttendanceScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.page} edges={['top']}>
+    <SafeAreaView style={[styles.page, { backgroundColor: "#000" }]} edges={['top']}>
       <View style={styles.scannerWrap}>
         <CameraView
           style={StyleSheet.absoluteFillObject}
@@ -106,8 +108,8 @@ export default function AttendanceScreen() {
             <Text style={styles.overlaySub}>Getting location…</Text>
           )}
 
-          <Pressable style={styles.btn} onPress={() => setScanned(false)}>
-            <Text style={styles.btnText}>{scanned ? "Ready…" : "Rescan"}</Text>
+          <Pressable style={[styles.btn, { backgroundColor: theme.colors.card }]} onPress={() => setScanned(false)}>
+            <Text style={[styles.btnText, { color: theme.colors.text }]}>{scanned ? "Ready…" : "Rescan"}</Text>
           </Pressable>
         </View>
       </View>
@@ -118,9 +120,9 @@ export default function AttendanceScreen() {
 const FRAME_SIZE = 260;
 
 const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: "#000" },
+  page: { flex: 1 },
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 16 },
-  message: { textAlign: 'center', paddingBottom: 10, color: 'white' },
+  message: { textAlign: 'center', paddingBottom: 10 },
   scannerWrap: { flex: 1 },
   // Mask semi-transparan
   mask: {
@@ -155,11 +157,10 @@ const styles = StyleSheet.create({
   overlaySub: { color: "#e5e7eb" },
   muted: { color: "#9ca3af", marginTop: 6 },
   btn: {
-    backgroundColor: "#111827",
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 12,
     marginTop: 6,
   },
-  btnText: { color: "white", fontWeight: "700" },
+  btnText: { fontWeight: "700" },
 });
