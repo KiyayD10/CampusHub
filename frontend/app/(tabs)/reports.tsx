@@ -16,7 +16,7 @@ import Animated, {
   useAnimatedStyle,
 } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
-import Header from "@/components/Header";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { api } from "@/hooks/useAPI";
 
 type Report = {
@@ -49,9 +49,7 @@ export default function ReportsScreen() {
   };
 
   return (
-    <View style={styles.page}>
-      <Header title="Reports" />
-
+    <SafeAreaView style={styles.page} edges={['top']}>
       <Animated.View entering={FadeInRight.springify().delay(100)} style={styles.body}>
         {/* 📝 Category Input */}
         <Text style={styles.label}>Category</Text>
@@ -127,7 +125,7 @@ export default function ReportsScreen() {
           />
         )}
       </Animated.View>
-    </View>
+    </SafeAreaView>
   );
 }
 
