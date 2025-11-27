@@ -157,6 +157,7 @@ export default function ProfileScreen() {
                             label="Help Center"
                             color="#EC4899"
                             delay={700}
+                            onPress={() => router.push("/profile/help")}
                             theme={theme}
                         />
                         <MenuItem
