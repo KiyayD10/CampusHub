@@ -1,13 +1,26 @@
-import { View, Text, StyleSheet, Image, Pressable, Switch, ScrollView } from "react-native";
+import { View, Text, StyleSheet, Image, Pressable, Switch, ScrollView, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
 import { useState } from "react";
 import { router } from "expo-router";
+import { useAuth } from "../../context/AuthContext";
+import { signOut } from "firebase/auth";
+import { auth } from "../../firebaseConfig";
 
 export default function ProfileScreen() {
     const [isDark, setIsDark] = useState(false);
     const [notifs, setNotifs] = useState(true);
+    const { user } = useAuth();
+
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+            // Router redirect is handled in _layout.tsx via AuthContext listener
+        } catch (error: any) {
+            Alert.alert("Error", "Failed to log out: " + error.message);
+        }
+    };
 
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
@@ -24,13 +37,13 @@ export default function ProfileScreen() {
                 <Animated.View entering={FadeInDown.delay(200)} style={styles.profileCard}>
                     <View style={styles.avatarContainer}>
                         <Image
-                            source={{ uri: "https://i.pravatar.cc/150?img=68" }}
+                            source={{ uri: (user?.photoURL && user.photoURL.startsWith('http')) ? user.photoURL : "https://i.pravatar.cc/150?img=68" }}
                             style={styles.avatar}
                         />
                         <View style={styles.onlineBadge} />
                     </View>
-                    <Text style={styles.name}>Alex Johnson</Text>
-                    <Text style={styles.studentId}>ID: 2023001234</Text>
+                    <Text style={styles.name}>{user?.displayName || user?.email?.split('@')[0] || "User"}</Text>
+                    <Text style={styles.studentId}>{user?.email}</Text>
                     <Text style={styles.major}>Computer Science</Text>
 
                     <View style={styles.statsRow}>
@@ -113,7 +126,7 @@ export default function ProfileScreen() {
                             label="Log Out"
                             color="#EF4444"
                             delay={800}
-                            onPress={() => alert("Logged out")}
+                            onPress={handleLogout}
                         />
                     </View>
                 </View>
