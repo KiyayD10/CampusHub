@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { validateRequiredFields, isValidEmail, validatePassword } from '@/lib/auth'
+import { validateRequiredFields, isValidEmail, validatePassword, hashPassword } from '@/lib/auth'
 import { Prisma } from "@/generated/prisma";
 
 // Buat fungsi utama buat tangani permintaan POST
@@ -53,5 +53,44 @@ export async function POST(request: NextResponse) {
                 { status: 400 }
             )
         }
-    }
+
+        // Hash password
+        const hashedPassword = await hashPassword(password);
+
+        // Buat user baru
+        const newUser = await Prisma.user.create({
+            data: {
+                name,
+                email,
+                password: hashedPassword,
+                role: userRole,
+                npm: npm || null,
+                phone: phone || null
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                npm: true,
+                phone: true
+            }
+        })
+
+        // Kirim respon sukses
+        return NextResponse.json(
+            { success: true, message: "Registrasi berhasil", data: newUser }, 
+            { status: 201 }
+        )
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error("Registrasi gagal:", error.message);
+        } else {
+            console.error("Registrasi gagal:", error);
+        }
+        return NextResponse.json(
+            { success: false, error: "Internal Server Error", message: "Terjadi kesalahan saat registrasi" }, 
+            { status: 500 }
+        )
+    } 
 }
