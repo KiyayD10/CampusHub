@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { validateRequiredFields, isValidEmail, validatePassword, hashPassword } from '@/lib/auth'
-import { Prisma } from "@/generated/prisma";
+import Prisma from "@/lib/prisma";
 
 // Buat fungsi utama buat tangani permintaan POST
 export async function POST(request: NextResponse) {
