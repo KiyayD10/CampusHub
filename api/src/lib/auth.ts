@@ -88,7 +88,7 @@ export const FORBIDDEN_RESPONSE = {
 };
 
 // Validasi field yang wajib diisi dari request body
-export function validasiRequiredFields(
+export function validateRequiredFields(
     body: Record<string, unknown>,
     requiredFields: string[]
 ): string | null {
