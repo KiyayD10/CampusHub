@@ -24,11 +24,11 @@ export async function POST(request: NextResponse) {
             )
         }
 
-        // Cek format password bener atau enggak
+        // Cek format password kuat atau lemah
         const passwordError = validatePassword(password);
         if (passwordError) {
             return NextResponse.json(
-                { success: false, error: "Validasi Gagal", message: passwordError }, 
+                { success: false, error: "Password lemah", message: passwordError }, 
                 { status: 400 }
             )
         }
