@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { validateRequiredFields, isValidEmail, validatePassword } from '@/lib/auth'
+import { Prisma } from "@/generated/prisma";
 
 // Buat fungsi utama buat tangani permintaan POST
 export async function POST(request: NextResponse) {
@@ -29,6 +30,26 @@ export async function POST(request: NextResponse) {
         if (passwordError) {
             return NextResponse.json(
                 { success: false, error: "Password lemah", message: passwordError }, 
+                { status: 400 }
+            )
+        }
+
+        // Cek role (hanya mahasiswa atau dosen)
+        const validRoles = ['student', 'lecturer']
+        const userRole = role || 'student'
+        if (!validRoles.includes(userRole)) {
+            return NextResponse.json(
+                { success: false, error: "Validasi Gagal", message: "Role tidak valid harus (Mahasiswa atau Dosen" },
+                { status: 400 }
+            )
+        }
+
+        // Cek apakah email sudah terdaftar
+        const existingUser = await Prisma.user.findUnique({ where: { email } 
+        })
+        if (existingUser) {
+            return NextResponse.json(
+                { success: false, error: "Email sudah ada", message: "Email sudah terdaftar di sistem" },
                 { status: 400 }
             )
         }
