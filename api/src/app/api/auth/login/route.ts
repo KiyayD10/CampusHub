@@ -64,5 +64,24 @@ export async function POST(request: NextResponse) {
             role: user.role,
             name: user.name
         })
+
+        // Siapin data user tanpa password
+        const userData = {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            npm: user.npm,
+            phone: user.phone,
+            avatar: user.avatar
+        }
+
+        // Kembalikan respon sukses
+        return NextResponse.json(
+            { success: true, message: "Login berhasil",
+                data: { token, user: userData }
+            }, 
+            { status: 200 }
+        )
     }
 }
