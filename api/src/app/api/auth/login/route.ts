@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { validateRequiredFields, isValidEmail } from "@/lib/auth";
+import Prisma from "@/lib/prisma";
 
 export async function POST(request: NextResponse) {
     try {
@@ -22,5 +23,20 @@ export async function POST(request: NextResponse) {
                 { status: 400 }
             )
         }
+
+        // Cari user berdasarkan email
+        const user = await Prisma.user.findUnique({ 
+            where: { email },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                password: true,
+                role: true,
+                npm: true,
+                phone: true,
+                avatar: true
+            }
+        })
     }
 }
