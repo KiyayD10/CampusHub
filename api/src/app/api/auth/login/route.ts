@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { validateRequiredFields, isValidEmail, verifyPassword } from "@/lib/auth";
+import { validateRequiredFields, isValidEmail, verifyPassword, generateToken } from "@/lib/auth";
 import Prisma from "@/lib/prisma";
 
 export async function POST(request: NextResponse) {
@@ -56,5 +56,13 @@ export async function POST(request: NextResponse) {
                 { status: 401 }
             )
         }
+
+        // Generate JWT token
+        const token = generateToken({
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            name: user.name
+        })
     }
 }
