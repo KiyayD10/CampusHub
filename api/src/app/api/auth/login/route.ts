@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { validateRequiredFields } from "@/lib/auth";
+import { validateRequiredFields, isValidEmail } from "@/lib/auth";
 
 export async function POST(request: NextResponse) {
     try {
@@ -11,6 +11,14 @@ export async function POST(request: NextResponse) {
         if (validationError) {
             return NextResponse.json(
                 { success: false, error: "Validasi Gagal", message: validationError }, 
+                { status: 400 }
+            )
+        }
+
+        // Validasi format email
+        if (!isValidEmail(email)) {
+            return NextResponse.json(
+                { success: false, error: "Email tidak valid", message: "Format email tidak valid" }, 
                 { status: 400 }
             )
         }
