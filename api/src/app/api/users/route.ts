@@ -1,6 +1,7 @@
-import Prisma from "@/lib/prisma";
+// import Prisma from "@/lib/prisma";
 import { getAuthUser, UNAUTHORIZED_RESPONSE } from "@/lib/auth";
 import { NextResponse, NextRequest } from "next/server";
+import { Prisma } from "@/generated/prisma";
 
 export async function GET(request: NextResponse) {
     try {
@@ -51,6 +52,16 @@ export async function GET(request: NextResponse) {
         return NextResponse.json(
             { success: true, data: users }, 
             { status: 200 }
+        )
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error("Get user error:", error.message)
+        } else {
+            console.error("Get user error:", error)
+        }
+        return NextResponse.json(
+            { success: false, error: "Terjadi kesalahan", message: "Terjadi kesalahan saat mengambil data user" }, 
+            { status: 500 }
         )
     }
 }
