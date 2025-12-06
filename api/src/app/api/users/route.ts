@@ -16,15 +16,15 @@ export async function GET(request: NextResponse) {
         // Ambil parameter role dari URL
         const { searchParams } = new URL(request.url)
         const roleQuery = searchParams.get('role')
-    }
 
-    // Inisialisasi kondisi query
-    let where : Prisma.UserWhereInput = {}
+        // Inisialisasi kondisi query
+        let where : Prisma.UserWhereInput = {}
 
     // Batasi akses data berdasarkan role 
-    if (getAuthUser.role === 'admin') {
-        where = { 
-            id: authUser.id
+        if (getAuthUser.role === 'admin') {
+            where = { 
+                id: authUser.id
+            }
         }
     }
 }
