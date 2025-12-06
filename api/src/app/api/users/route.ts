@@ -1,6 +1,6 @@
-import { Prisma } from "@/generated/prisma";
+import Prisma from "@/lib/prisma";
 import { getAuthUser, UNAUTHORIZED_RESPONSE } from "@/lib/auth";
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 
 export async function GET(request: NextResponse) {
     try {
@@ -20,11 +20,37 @@ export async function GET(request: NextResponse) {
         // Inisialisasi kondisi query
         let where : Prisma.UserWhereInput = {}
 
-    // Batasi akses data berdasarkan role 
+        // Batasi akses data berdasarkan role 
         if (getAuthUser.role === 'admin') {
             where = { 
                 id: authUser.id
             }
+        } else {
+            if (roleQuery) {
+                where.role = roleQuery
+            }
         }
+
+        // Ambil data user tanpa password
+        const users = await Prisma.user.findMany({ 
+            where,
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                npm: true,
+                phone: true,
+                avatar: true,
+                createdAt: true
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        })
+        return NextResponse.json(
+            { success: true, data: users }, 
+            { status: 200 }
+        )
     }
 }
