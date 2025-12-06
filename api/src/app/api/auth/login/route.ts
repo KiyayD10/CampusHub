@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { validateRequiredFields, isValidEmail } from "@/lib/auth";
 import Prisma from "@/lib/prisma";
+import { error } from "console";
 
 export async function POST(request: NextResponse) {
     try {
@@ -38,5 +39,13 @@ export async function POST(request: NextResponse) {
                 avatar: true
             }
         })
+
+        // User tidak ditemukan
+        if (!user) {
+            return NextResponse.json(
+                { success: false, error: "Kredensial tidak valid", message: "Email atau password salah" },
+                { status: 401 }
+            )
+        }
     }
 }
