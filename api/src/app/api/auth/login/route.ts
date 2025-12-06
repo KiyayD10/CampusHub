@@ -83,5 +83,15 @@ export async function POST(request: NextResponse) {
             }, 
             { status: 200 }
         )
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error("Login error:", error.message)
+        } else {
+            console.error("Login error:", error)
+        }
+        return NextResponse.json(
+            { success: false, error: "Terjadi kesalahan", message: "Terjadi kesalahan saat login" },
+            { status: 500 }
+        )
     }
 }
