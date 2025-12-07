@@ -1,6 +1,6 @@
 import { Prisma } from "@/generated/prisma";
 import prisma from '@/lib/prisma'
-import { getAuthUser, UNAUTHORIZED_RESPONSE } from "@/lib/auth";
+import { getAuthUser, UNAUTHORIZED_RESPONSE, validateRequiredFields } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 
 // Ambil semua tugas
@@ -83,5 +83,24 @@ export async function POST(request: NextResponse) {
         // parsing request body
         const body = await request.json()
         const { title, description, course, dueDate, priority, reminder } = body
+
+        // validasi fields (isi wajib)
+        const validationError = validateRequiredFields(body, ['title'])
+        if (validationError) {
+            return NextResponse.json(
+                { success: false, error: "Validation Error", message: validationError }, 
+                { status: 400 }
+            )
+        }
+
+        // Validasi priority
+        const validPriorities = ['low', 'medium', 'high']
+        const taskPriority = priority || 'medium'
+        if (!validPriorities.includes(taskPriority)) {
+            return NextResponse.json(
+                { success: false, error: 'Invalid Priority', message: 'Priority harus low, medium, atau high' },
+                { status: 400 }
+            )
+        }
     }
 }
