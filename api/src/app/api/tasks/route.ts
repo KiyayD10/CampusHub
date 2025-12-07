@@ -1,4 +1,5 @@
 import { Prisma } from "@/generated/prisma";
+import prisma from '@/lib/prisma'
 import { getAuthUser, UNAUTHORIZED_RESPONSE } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -25,5 +26,24 @@ export async function GET(request: NextRequest) {
         if (status) where.status = status
         if (priority) where.priority = priority
         if (course) where.course = course
+
+        // Ambil tasks
+        const tasks = await prisma.task.findMany({ 
+            where,
+            orderBy: [
+                { status: 'asc' }, 
+                { dueDate: 'asc' }, 
+                { createdAt: 'desc' }
+            ],
+            include: { 
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
+                    }
+                }
+            }
+        })
     }
 }
