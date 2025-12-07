@@ -79,6 +79,17 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
                 { status: 401 }
             )
         }
+
+        const userId = parseInt(params.id)
+
+        // Cuma boleh edit diri sendiri atau admin
+        if (authUser.id !== userId && authUser.role !== 'admin' ) {
+            return NextResponse.json(
+                { success: false, error: "Forbidden", message: "Anda tidak bisa mengubah profile user lain" }, 
+                { status: 403 }
+            )
+        }
+
     } catch (error: unknown) {
         return NextResponse.json(
             { error: "Internal Error" },
