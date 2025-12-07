@@ -104,9 +104,35 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
             updateData.password = await hashPassword(password)
         }
 
-    } catch (error: unknown) {
+        // Update user
+        const updatedUser = await prisma.user.update({ 
+            where: { id: userId },
+            data: updateData,
+            select: {
+                id: true, 
+                name: true, 
+                email: true, 
+                role: true, 
+                npm: true, 
+                phone: true, 
+                avatar: true, 
+                createdAt: true, 
+                updatedAt: true
+            }
+        })
         return NextResponse.json(
-            { error: "Internal Error" },
+            { success: true, message: "Profile berhasil diupdate", data: updatedUser },
+            { status: 200 }
+        )
+
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error('Update user error:', error.message)
+        } else {
+            console.error('Update user error:', error)
+        }
+        return NextResponse.json(
+            { success: false, error: "Internal Error", message: "Terjadi kesalahan saat update profile" },
             { status: 500 }
         )
     }
