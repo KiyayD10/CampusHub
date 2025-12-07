@@ -68,3 +68,20 @@ export async function GET(request: NextRequest) {
         )
     }
 }
+
+// Buat tugas baru
+export async function POST(request: NextResponse) {
+    try {
+        const authUser = getAuthUser(request)
+        if (!authUser) {
+            return NextResponse.json(
+                { success: false, ...UNAUTHORIZED_RESPONSE }, 
+                { status: 401 }
+            )
+        }
+
+        // parsing request body
+        const body = await request.json()
+        const { title, description, course, dueDate, priority, reminder } = body
+    }
+}
