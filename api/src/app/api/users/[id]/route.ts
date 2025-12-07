@@ -62,7 +62,26 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         } else {
             console.error("Get user error:", error)
         }
-        return NextResponse.json({ success: false, error: "Internal Server Error", message: "Terjadi kesalahan saat mengambil data user" }, 
+        return NextResponse.json(
+            { success: false, error: "Internal Server Error", message: "Terjadi kesalahan saat mengambil data user" }, 
+            { status: 500 }
+        )
+    }
+}
+
+// UPDATE user profile
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+    try {
+        const authUser = getAuthUser(request)
+        if (!authUser) {
+            return NextResponse.json(
+                { success: false, ...UNAUTHORIZED_RESPONSE }, 
+                { status: 401 }
+            )
+        }
+    } catch (error: unknown) {
+        return NextResponse.json(
+            { error: "Internal Error" },
             { status: 500 }
         )
     }
