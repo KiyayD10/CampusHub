@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthUser, UNAUTHORIZED_RESPONSE } from '@/lib/auth'
+import { getAuthUser, hashPassword, UNAUTHORIZED_RESPONSE } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { Prisma } from "@/generated/prisma";
 
 // GET user berdasarkan id
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
@@ -82,12 +83,25 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
         const userId = parseInt(params.id)
 
-        // Cuma boleh edit diri sendiri atau admin
+        // User hanya bisa update profile sendiri (kecuali admin)
         if (authUser.id !== userId && authUser.role !== 'admin' ) {
             return NextResponse.json(
                 { success: false, error: "Forbidden", message: "Anda tidak bisa mengubah profile user lain" }, 
                 { status: 403 }
             )
+        }
+
+        const body = await request.json();
+        const { name, phone, avatar, password } = body
+
+        // Siapkan data update
+        const updateData: Prisma.UserUpdateInput = {}
+
+        if (name) updateData.name = name
+        if (phone !== undefined ) updateData.phone = phone
+        if (avatar !== undefined ) updateData.avatar = avatar
+        if (password) {
+            updateData.password = await hashPassword(password)
         }
 
     } catch (error: unknown) {
