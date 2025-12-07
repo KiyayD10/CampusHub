@@ -45,5 +45,26 @@ export async function GET(request: NextRequest) {
                 }
             }
         })
+
+        // Hitung statistik
+        const stats = {
+            total: tasks.length,
+            todo: tasks.filter(t => t.status === 'todo').length,
+            inProgress: tasks.filter(t => t.status === 'in_progress').length,
+            done: tasks.filter(t => t.status === 'done').length
+        }
+        return NextResponse.json(
+            { success: true, data: tasks, stats },
+            { status: 200 }
+        )
+    } catch (error) {
+        console.error("Get tasks error:", error)
+        if (error instanceof Error) {
+            console.error("Error message:", error.message)
+        }
+        return NextResponse.json(
+            { success: false, error: "Internal Server Error", message: "Terjadi kesalahan saat mengambil data tasks" },
+            { status: 500 }
+        )
     }
 }
