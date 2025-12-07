@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
 }
 
 // Buat tugas baru
-export async function POST(request: NextResponse) {
+export async function POST(request: NextRequest) {
     try {
         const authUser = getAuthUser(request)
         if (!authUser) {
@@ -102,5 +102,40 @@ export async function POST(request: NextResponse) {
                 { status: 400 }
             )
         }
+
+        // Buat tugas
+        const newTask = await prisma.task.create({
+            data: {
+                title,
+                description: description || null,
+                course: course || null,
+                dueDate: new Date(dueDate),
+                priority: taskPriority,
+                reminder: reminder ? new Date(reminder) : null,
+                userId: authUser.id
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
+                    }
+                }
+            }
+        })
+        return NextResponse.json(
+            { success: true, message: "Tugas berhasil dibuat", data: newTask },
+            { status: 201 }
+        )
+    } catch (error) {
+        console.error("Create task error:", error)
+        if (error instanceof Error) {
+            console.error("Error message:", error.message)
+        }
+        return NextResponse.json(
+            { success: false, error: "Internal Server Error", message: "Terjadi kesalahan saat membuat tugas" },
+            { status: 500 }
+        )
     }
 }
