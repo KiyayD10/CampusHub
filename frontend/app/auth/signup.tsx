@@ -34,7 +34,7 @@ export default function SignUpScreen() {
             await setDoc(doc(db, "users", user.uid), {
                 fullName,
                 shortName,
-                phoneNumber,
+                phoneNumber,    
                 email,
                 createdAt: new Date().toISOString()
             });
