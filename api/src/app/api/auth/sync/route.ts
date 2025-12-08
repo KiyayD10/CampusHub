@@ -40,7 +40,28 @@ export async function POST(request: Request) {
             });
         }
 
+        // Handle User Baru
+        const newUser = await prisma.user.create({
+            data: {
+                email: email,
+                name: name || 'Mahasiswa Baru',
+                firebaseUid: uid,
+                role: 'student',
+                password: null,
+                avatar: avatar || null,
+                npm: npm || null
+            }
+        });
+        return NextResponse.json({ 
+            message: "Sync Berhasil (User Baru Dibuat)", 
+            user: newUser 
+        }, { status: 201 });
+
     } catch (error) {
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        console.error('Sync Error:', error);
+        return NextResponse.json(
+            { error: 'Gagal koneksi ke Database' }, 
+            { status: 500 }
+        );
     }
 }
