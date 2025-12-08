@@ -19,13 +19,15 @@ model User {
   id Int @id @default(autoincrement())  // ID unik buat tiap user
   name String                           //Nama lengkap user
   email String @unique                  // Email user, @unique artinya gak boleh ada yang sama
-  password String                       //Password diHash (diamanin)
+  password String?                      //Password diHash (diamanin)
   role String @default("student")       // Peran user, kalau gak diisi otomatis jadi "student
   npm String?                           // Tanda tanya (?) artinya gak wajib diisi (opsional), buat mahasiswa
   phone String?                         // Nomor HP, juga gak wajib diisi
   avatar String?                        // Link ke foto profil, ini juga gk wajib diisi
   createdAt DateTime @default(now())    // Kapan akun dibuat
   updatedAt DateTime @updatedAt          // Kapan data user terakhir diubah
+
+  firebaseUid String? @unique
 
   // Relasi ke tabel lain 
   tasks Task[]                      // Untuk banyak tugas 
@@ -38,6 +40,7 @@ model User {
   // Indeks untuk mempercepat pencarian data di database
   @@index([email])  // Cari user berdasarkan email
   @@index([role])   // Cari user berdasarkan role 
+  @@index([firebaseUid])
 }
 
 // Model Task untuk mengatur tugas-tugas kuliah
