@@ -8,9 +8,39 @@ export async function POST(request: Request) {
         const body = await request.json();
         const { uid, email, name, avatar, npm } = body;
 
-        
+        // Validasi Input
+        if (!uid || !email) {
+            return NextResponse.json(
+                { error: "Wajib kirim UID & Email!" }, 
+                { status: 400 }
+            );
+        }
+
+        // Cek User di Database
+        const existingUser = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { email: email },
+                    { firebaseUid: uid }
+                ]
+            }
+        });
+
+        // Handle User Lama
+        if (existingUser) {
+            if (!existingUser.firebaseUid) {
+                await prisma.user.update({
+                    where: { id: existingUser.id },
+                    data: { firebaseUid: uid }
+                });
+            }
+            return NextResponse.json({ 
+                message: "Sync Berhasil (User Lama)", 
+                user: existingUser 
+            });
+        }
 
     } catch (error) {
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
