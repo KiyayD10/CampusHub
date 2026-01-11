@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt, { SignOptions } from "jsonwebtoken";
 import { NextRequest } from "next/server";
+import { firebaseAdmin } from './firebase';
 
 // Hash password dengan bcrypt
 export async function hashPassword(password: string): Promise<string> {
@@ -110,4 +111,15 @@ export function validatePassword(password: string): string | null {
         return 'Password minimal 6 karakter';
     }
     return null;
+}
+
+// Tambahan: Verifikasi Token dari Frontend (Firebase)
+export async function verifyFirebaseToken(token: string) {
+    try {
+        const decodedToken = await firebaseAdmin.auth().verifyIdToken(token);
+        return decodedToken; 
+    } catch (error) {
+        console.error("Error verify firebase token:", error);
+        return null;
+    }
 }

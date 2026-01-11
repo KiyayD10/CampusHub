@@ -1,96 +1,80 @@
 import { NextResponse } from "next/server";
-import { validateRequiredFields, isValidEmail, validatePassword, hashPassword } from '@/lib/auth'
+import { verifyFirebaseToken, generateToken } from '@/lib/auth';
 import Prisma from "@/lib/prisma";
 
-// Buat fungsi utama buat tangani permintaan POST
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { name, email, password, role, npm, phone } = body;
+        // Frontend kirim "token" (firebase id token) & data pelengkap
+        const { token, role, npm, phone, name } = body;
 
-        // Cek field wajib (name, email, password)
-        const validationError = validateRequiredFields(body, ['name', 'email', 'password'])
-        if (validationError) {
+        if (!token) {
             return NextResponse.json(
-                { success: false, error: "Validasi Gagal", message: validationError }, 
+                { success: false, message: "Token Firebase wajib dikirim" },
                 { status: 400 }
-            )
+            );
         }
 
-        // Cek format email bener atau enggak
-        if (!isValidEmail(email)) {
+        // Verifikasi Token ke Firebase
+        const firebaseUser = await verifyFirebaseToken(token);
+        if (!firebaseUser || !firebaseUser.email) {
             return NextResponse.json(
-                { success: false, error: "Validasi Gagal", message: "Email tidak valid" }, 
-                { status: 400 }
-            )
+                { success: false, message: "Token Firebase tidak valid atau expired" },
+                { status: 401 }
+            );
         }
 
-        // Cek format password kuat atau lemah
-        const passwordError = validatePassword(password);
-        if (passwordError) {
-            return NextResponse.json(
-                { success: false, error: "Password lemah", message: passwordError }, 
-                { status: 400 }
-            )
+        const email = firebaseUser.email;
+
+        // 2. Cek apakah user ini udah ada 
+        let user = await Prisma.user.findUnique({
+            where: { email },
+        });
+
+        // Kalau belum ada, kita BUAT BARU
+        if (!user) {
+            // Default role student kalau tidak dikirim
+            const userRole = role || 'student'; 
+            
+            user = await Prisma.user.create({
+                data: {
+                    email: email,
+                    name: name || firebaseUser.name || "No Name",
+                    password: "FIREBASE_AUTH_USER", 
+                    role: userRole,
+                    npm: npm || null,
+                    phone: phone || null,
+                }
+            });
         }
 
-        // Cek role (hanya mahasiswa atau dosen)
-        const validRoles = ['student', 'lecturer']
-        const userRole = role || 'student'
-        if (!validRoles.includes(userRole)) {
-            return NextResponse.json(
-                { success: false, error: "Validasi Gagal", message: "Role tidak valid harus (Mahasiswa atau Dosen" },
-                { status: 400 }
-            )
-        }
+        // Generate Token JWT Backend (Session sendiri)
+        const backendToken = generateToken({
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            name: user.name
+        });
 
-        // Cek apakah email sudah terdaftar
-        const existingUser = await Prisma.user.findUnique({ where: { email } 
-        })
-        if (existingUser) {
-            return NextResponse.json(
-                { success: false, error: "Email sudah ada", message: "Email sudah terdaftar di sistem" },
-                { status: 400 }
-            )
-        }
-
-        // Hash password
-        const hashedPassword = await hashPassword(password);
-
-        // Buat user baru
-        const newUser = await Prisma.user.create({
+        return NextResponse.json({
+            success: true,
+            message: "Login/Register berhasil",
             data: {
-                name,
-                email,
-                password: hashedPassword,
-                role: userRole,
-                npm: npm || null,
-                phone: phone || null
-            },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                npm: true,
-                phone: true
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    role: user.role,
+                    name: user.name
+                },
+                token: backendToken // Token ini yang disimpan frontend
             }
-        })
+        });
 
-        // Kirim respon sukses
+    } catch (error) {
+        console.error("Auth Error:", error);
         return NextResponse.json(
-            { success: true, message: "Registrasi berhasil", data: newUser }, 
-            { status: 201 }
-        )
-    } catch (error: unknown) {
-        if (error instanceof Error) {
-            console.error("Registrasi gagal:", error.message);
-        } else {
-            console.error("Registrasi gagal:", error);
-        }
-        return NextResponse.json(
-            { success: false, error: "Internal Server Error", message: "Terjadi kesalahan saat registrasi" }, 
+            { success: false, message: "Terjadi kesalahan server" },
             { status: 500 }
-        )
-    } 
+        );
+    }
 }
