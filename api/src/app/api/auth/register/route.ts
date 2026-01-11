@@ -44,6 +44,7 @@ export async function POST(request: Request) {
                     role: userRole,
                     npm: npm || null,
                     phone: phone || null,
+                    firebaseUid: firebaseUser.uid,
                 }
             });
         }
