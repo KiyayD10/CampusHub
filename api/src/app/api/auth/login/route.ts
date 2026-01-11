@@ -1,97 +1,78 @@
 import { NextResponse } from "next/server";
-import { validateRequiredFields, isValidEmail, verifyPassword, generateToken } from "@/lib/auth";
+import { verifyFirebaseToken, generateToken } from "@/lib/auth";
 import Prisma from "@/lib/prisma";
 
-export async function POST(request: NextResponse) {
+export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { email, password } = body;
+        const { token } = body;
 
-        // Cek field wajib (email, password)
-        const validationError = validateRequiredFields(body, ['email', 'password']);
-        if (validationError) {
+        if (!token) {
             return NextResponse.json(
-                { success: false, error: "Validasi Gagal", message: validationError }, 
+                { success: false, message: "Token Firebase wajib dikirim" },
                 { status: 400 }
-            )
+            );
         }
 
-        // Validasi format email
-        if (!isValidEmail(email)) {
+        // Verifikasi Token ke Firebase
+        const firebaseUser = await verifyFirebaseToken(token);
+        if (!firebaseUser || !firebaseUser.email) {
             return NextResponse.json(
-                { success: false, error: "Email tidak valid", message: "Format email tidak valid" }, 
-                { status: 400 }
-            )
+                { success: false, message: "Token tidak valid atau expired" },
+                { status: 401 }
+            );
         }
 
-        // Cari user berdasarkan email
-        const user = await Prisma.user.findUnique({ 
+        const email = firebaseUser.email;
+
+        // Cari user di database berdasarkan email dari token
+        const user = await Prisma.user.findUnique({
             where: { email },
             select: {
                 id: true,
                 name: true,
                 email: true,
-                password: true,
                 role: true,
                 npm: true,
                 phone: true,
                 avatar: true
             }
-        })
+        });
 
-        // User tidak ditemukan
+        // Jika user tidak ketemu harus (register)
         if (!user) {
             return NextResponse.json(
-                { success: false, error: "Kredensial tidak valid", message: "Email atau password salah" },
-                { status: 401 }
-            )
+                { success: false, message: "User belum terdaftar. Silakan registrasi terlebih dahulu." },
+                { status: 404 }
+            );
         }
 
-        // Verifikasi password
-        const isPasswordValid = await verifyPassword(password, user.password)
-
-        if (!isPasswordValid) {
-            return NextResponse.json(
-                { success: false, error: "Kredensial tidak valid", message: "Email atau password salah" },
-                { status: 401 }
-            )
-        }
-
-        // Generate JWT token
-        const token = generateToken({
+        // Kalau user ada Generate Token Session
+        const sessionToken = generateToken({
             id: user.id,
             email: user.email,
             role: user.role,
             name: user.name
-        })
+        });
 
-        // Siapin data user tanpa password
-        const userData = {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            npm: user.npm,
-            phone: user.phone,
-            avatar: user.avatar
-        }
-
-        // Kembalikan respon sukses
+        // Kembalikan respons sukses
         return NextResponse.json(
-            { success: true, message: "Login berhasil",
-                data: { token, user: userData }
-            }, 
+            {
+                success: true,
+                message: "Login berhasil",
+                data: {
+                    token: sessionToken,
+                    user: user
+                }
+            },
             { status: 200 }
-        )
-    } catch (error: unknown) {
-        if (error instanceof Error) {
-            console.error("Login error:", error.message)
-        } else {
-            console.error("Login error:", error)
-        }
+        );
+
+    } catch (error) {
+        console.error("Login Error:", error);
         return NextResponse.json(
-            { success: false, error: "Terjadi kesalahan", message: "Terjadi kesalahan saat login" },
+            { success: false, message: "Terjadi kesalahan server saat login" },
             { status: 500 }
-        )
+        );
     }
 }
