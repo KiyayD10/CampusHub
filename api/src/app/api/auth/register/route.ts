@@ -3,7 +3,7 @@ import { validateRequiredFields, isValidEmail, validatePassword, hashPassword } 
 import Prisma from "@/lib/prisma";
 
 // Buat fungsi utama buat tangani permintaan POST
-export async function POST(request: NextResponse) {
+export async function POST(request: Request) {
     try {
         const body = await request.json();
         const { name, email, password, role, npm, phone } = body;

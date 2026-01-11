@@ -9,14 +9,11 @@ export async function hashPassword(password: string): Promise<string> {
 }
 
 // Verifikasi password dengan hash
-export async function verifyPassword(
-    password : string, 
-    hashedPassword : string
-): Promise<boolean> {
+export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
     return await bcrypt.compare(password, hashedPassword);
 }
 
-// Tipe data untuk isi toke JWT
+// Tipe data untuk isi token JWT
 export interface JWTPayload {
     id: number;
     email: string;
@@ -46,15 +43,14 @@ export function verifyToken(token: string): JWTPayload | null {
         if (!secret) {
             throw new Error("JWT_SECRET tidak ada di file .env");
         }
-        const decode = jwt.verify(token, secret) as JWTPayload  ;
-        return decode;
-    } catch (error) {
-        console.error("Gagal memverifikasi token:", error);
+        const decoded = jwt.verify(token, secret) as JWTPayload;
+        return decoded;
+    } catch { 
         return null;
     }
 }
 
-// Ekstrak token dari Authorizaton header
+// Ekstrak token dari Authorization header
 export function extractToken(request: NextRequest): string | null {
     const authHeader = request.headers.get("authorization");
     if (!authHeader) return null;
@@ -67,32 +63,35 @@ export function extractToken(request: NextRequest): string | null {
     return parts[1];  
 }
 
-// Dapatkan data user yang  terautentikasi dari request
+// Dapatkan data user yang terautentikasi dari request
 export function getAuthUser(request: NextRequest): JWTPayload | null {
     const token = extractToken(request);
     if (!token) return null;
     return verifyToken(token);
 }
 
-// Cek apakah user memiliki role tertentu 
-export function hashRole(user: JWTPayload, allowedRoles: string[]): boolean {
+// Cek Role
+export function hasRole(user: JWTPayload, allowedRoles: string[]): boolean {
     return allowedRoles.includes(user.role);
 }
+
 export const UNAUTHORIZED_RESPONSE = {
+    success: false,
     error: 'Unauthorized',
     message: 'Token tidak valid atau sudah expired',
 };
+
 export const FORBIDDEN_RESPONSE = {
+    success: false,
     error: 'Forbidden',
     message: 'Anda tidak memiliki akses ke halaman ini',
 };
 
-// Validasi field yang wajib diisi dari request body
 export function validateRequiredFields(
-    body: Record<string, unknown>,
-    requiredFields: string[]
+    body: Record<string, unknown>, 
+    fields: string[]
 ): string | null {
-    const missingFields = requiredFields.filter((field) => !body[field]);
+    const missingFields = fields.filter((field) => !body[field]);
     if (missingFields.length > 0) {
         return `Field ini wajib diisi: ${missingFields.join(', ')}`;
     }
