@@ -104,11 +104,6 @@ export default function SignInScreen() {
                     <View style={styles.line} />
                 </View>
 
-                <TouchableOpacity style={styles.googleButton} onPress={() => handleGoogleSignIn()} disabled={!request}>
-                    <Ionicons name="logo-google" size={20} color="#DB4437" />
-                    <Text style={styles.googleButtonText}>Sign in with Google</Text>
-                </TouchableOpacity>
-
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>Don't have an account? </Text>
                     <Link href="/auth/signup" asChild>
