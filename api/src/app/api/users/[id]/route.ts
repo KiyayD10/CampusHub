@@ -1,33 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthUser, hashPassword, UNAUTHORIZED_RESPONSE } from '@/lib/auth'
-import prisma from '@/lib/prisma'
+import { getAuthUser, hashPassword, UNAUTHORIZED_RESPONSE } from '@/lib/auth';
+import prisma from '@/lib/prisma';
 import { Prisma } from "@/generated/prisma";
 
+// Definisi Tipe untuk Context Params
+interface RouteParams {
+    params: {
+        id: string;
+    };
+}
+
 // GET user berdasarkan id
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
     try {
-        // Cek auth
-        const authUser = getAuthUser(request)
+        const authUser = getAuthUser(request);
         if (!authUser) {
-            return NextResponse.json(
-                { ...UNAUTHORIZED_RESPONSE }, 
-                { status: 401 }
-            )
+            return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 });
         }
 
-        const userId = parseInt(params.id)
+        const targetUserId = parseInt(params.id);
+        const currentUserId = Number(authUser.id);
 
-        // SECURITY CHECK (PENTING!) kalau bukan admin DAN bukan akun sendiri, tolak aksesnya
-        if (authUser.role !== 'admin' && authUser.id !== userId) {
+        // Security Check: Hanya Admin atau Pemilik Akun yang boleh lihat
+        if (authUser.role !== 'admin' && currentUserId !== targetUserId) {
             return NextResponse.json(
                 { success: false, error: "Forbidden", message: "Anda tidak memiliki akses untuk melihat profil ini" }, 
                 { status: 403 }
-            )
+            );
         }
 
-        // Ambil data user berdasarkan id
         const user = await prisma.user.findUnique({ 
-            where: { id: userId },
+            where: { id: targetUserId },
             select: {
                 id: true, 
                 name: true, 
@@ -46,67 +49,70 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
                     }
                 }
             }
-        })
+        });
+
         if (!user) {
             return NextResponse.json(
                 { success: false, error: "Not Found", message: "User tidak ditemukan" }, 
                 { status: 404 }
-            )
+            );
         }
+
         return NextResponse.json(
             { success: true, data: user },
             { status: 200 }
-        )
+        );
+
     } catch (error: unknown) {
+        // Penanganan Error Strict Type (Tanpa any)
         if (error instanceof Error) {
-            console.error("Get user error:", error.message)
+            console.error("Get user error:", error.message);
         } else {
-            console.error("Get user error:", error)
+            console.error("Get user unknown error:", error);
         }
+        
         return NextResponse.json(
             { success: false, error: "Internal Server Error", message: "Terjadi kesalahan saat mengambil data user" }, 
             { status: 500 }
-        )
+        );
     }
 }
 
 // UPDATE user profile
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: RouteParams) {
     try {
-        const authUser = getAuthUser(request)
+        const authUser = getAuthUser(request);
         if (!authUser) {
-            return NextResponse.json(
-                { ...UNAUTHORIZED_RESPONSE }, 
-                { status: 401 }
-            )
+            return NextResponse.json(UNAUTHORIZED_RESPONSE, { status: 401 });
         }
 
-        const userId = parseInt(params.id)
+        const targetUserId = parseInt(params.id);
+        const currentUserId = Number(authUser.id);
 
-        // User hanya bisa update profile sendiri (kecuali admin)
-        if (authUser.id !== userId && authUser.role !== 'admin' ) {
+        // Security Check
+        if (authUser.role !== 'admin' && currentUserId !== targetUserId) {
             return NextResponse.json(
                 { success: false, error: "Forbidden", message: "Anda tidak bisa mengubah profile user lain" }, 
                 { status: 403 }
-            )
+            );
         }
 
+        // Parsing body
         const body = await request.json();
-        const { name, phone, avatar, password } = body
+        const { name, phone, avatar, password } = body;
 
-        // Siapkan data update
-        const updateData: Prisma.UserUpdateInput = {}
+        // Menggunakan tipe Prisma untuk updateData agar type-safe
+        const updateData: Prisma.UserUpdateInput = {};
 
-        if (name) updateData.name = name
-        if (phone !== undefined ) updateData.phone = phone
-        if (avatar !== undefined ) updateData.avatar = avatar
+        if (name) updateData.name = name;
+        if (phone !== undefined) updateData.phone = phone;
+        if (avatar !== undefined) updateData.avatar = avatar;
         if (password) {
-            updateData.password = await hashPassword(password)
+            updateData.password = await hashPassword(password);
         }
 
-        // Update user
         const updatedUser = await prisma.user.update({ 
-            where: { id: userId },
+            where: { id: targetUserId },
             data: updateData,
             select: {
                 id: true, 
@@ -119,21 +125,23 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
                 createdAt: true, 
                 updatedAt: true
             }
-        })
+        });
+
         return NextResponse.json(
             { success: true, message: "Profile berhasil diupdate", data: updatedUser },
             { status: 200 }
-        )
+        );
 
     } catch (error: unknown) {
         if (error instanceof Error) {
-            console.error('Update user error:', error.message)
+            console.error('Update user error:', error.message);
         } else {
-            console.error('Update user error:', error)
+            console.error('Update user unknown error:', error);
         }
+
         return NextResponse.json(
             { success: false, error: "Internal Error", message: "Terjadi kesalahan saat update profile" },
             { status: 500 }
-        )
+        );
     }
 }
