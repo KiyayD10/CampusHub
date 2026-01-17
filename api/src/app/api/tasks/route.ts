@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
         const authUser = getAuthUser(request)
         if (!authUser) {
             return NextResponse.json(
-                { success: false, ...UNAUTHORIZED_RESPONSE }, 
+                { ...UNAUTHORIZED_RESPONSE }, 
                 { status: 401 }
             )
         }
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
         const authUser = getAuthUser(request)
         if (!authUser) {
             return NextResponse.json(
-                { success: false, ...UNAUTHORIZED_RESPONSE }, 
+                { ...UNAUTHORIZED_RESPONSE }, 
                 { status: 401 }
             )
         }

@@ -10,7 +10,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         const authUser = getAuthUser(request)
         if (!authUser) {
             return NextResponse.json(
-                { success: false, ...UNAUTHORIZED_RESPONSE }, 
+                { ...UNAUTHORIZED_RESPONSE }, 
                 { status: 401 }
             )
         }
@@ -76,7 +76,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         const authUser = getAuthUser(request)
         if (!authUser) {
             return NextResponse.json(
-                { success: false, ...UNAUTHORIZED_RESPONSE }, 
+                { ...UNAUTHORIZED_RESPONSE }, 
                 { status: 401 }
             )
         }
